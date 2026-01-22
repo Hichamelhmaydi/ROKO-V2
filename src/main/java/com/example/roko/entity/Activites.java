@@ -1,7 +1,4 @@
 package com.example.roko.entity;
 
-
-
-
-public class voyages {
+public class Activites {
 }

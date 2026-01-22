@@ -1,4 +1,4 @@
 package com.example.roko.entity;
 
-public class payment {
+public class Activites_Voyages {
 }
