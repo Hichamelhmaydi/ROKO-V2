@@ -1,4 +1,7 @@
 package com.example.roko.enums;
 
-public class PaymentStatus {
+public enum PaymentStatus {
+    EN_ATTENTE,
+    SUCCES,
+    ECHEC
 }
