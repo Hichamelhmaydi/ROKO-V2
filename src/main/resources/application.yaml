@@ -1,3 +1,5 @@
 spring:
   application:
     name: roko
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
