@@ -59,7 +59,7 @@ public interface ActiviteVoyageRepository extends JpaRepository<Activites_Voyage
     @Query("DELETE FROM Activites_Voyages av WHERE av.voyage.id = :voyageId")
     void deleteByVoyageId(@Param("voyageId") Long voyageId);
 
- 
+
     @Query("DELETE FROM Activites_Voyages av WHERE av.activite.id = :activiteId")
     void deleteByActiviteId(@Param("activiteId") Long activiteId);
 }
