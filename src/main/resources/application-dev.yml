@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/ROKOV2
-    username: postgres
-    password: abc
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -12,5 +12,4 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  config:
-    import: "optional:classpath:.env"
+        dialect: org.hibernate.dialect.PostgreSQLDialect
