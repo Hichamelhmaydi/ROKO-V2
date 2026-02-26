@@ -49,7 +49,7 @@ public class Activites_Voyages {
     @Column(length = 500)
     private String notes;
 
-    
+
     @Column(nullable = false)
     private Boolean disponible = true;
 }

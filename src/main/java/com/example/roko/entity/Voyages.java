@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
 @Entity
 @Table(name = "voyages")
 @Data
@@ -29,7 +30,7 @@ public class Voyages {
     private String description;
 
     @Column(name = "cover")
-    private String cover; // URL de l'image de couverture
+    private String cover;
 
     @Column(nullable = false)
     private String destination;
@@ -52,10 +53,31 @@ public class Voyages {
     @Column(name = "photo_url")
     private List<String> photos = new ArrayList<>();
 
+
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Activites> activites = new HashSet<>();
+    private Set<Activites_Voyages> activitesVoyages = new HashSet<>();
 
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL)
     private Set<Reservations> reservations = new HashSet<>();
 
+
+    public void addActivite(Activites activite, Boolean obligatoire, Integer ordre) {
+        Activites_Voyages activiteVoyage = new Activites_Voyages();
+        activiteVoyage.setActivite(activite);
+        activiteVoyage.setVoyage(this);
+        activiteVoyage.setObligatoire(obligatoire);
+        activiteVoyage.setOrdreAffichage(ordre);
+        activiteVoyage.setDisponible(true);
+
+        activitesVoyages.add(activiteVoyage);
+        activite.getActivitesVoyages().add(activiteVoyage);
+    }
+
+
+    public void removeActivite(Activites activite) {
+        activitesVoyages.removeIf(av ->
+                av.getVoyage().equals(this) && av.getActivite().equals(activite));
+        activite.getActivitesVoyages().removeIf(av ->
+                av.getVoyage().equals(this) && av.getActivite().equals(activite));
+    }
 }
