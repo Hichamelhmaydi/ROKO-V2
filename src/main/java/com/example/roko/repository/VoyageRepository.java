@@ -32,7 +32,7 @@ public interface VoyageRepository extends JpaRepository<Voyages, Long> {
     List<Voyages> findByDestinationAndStatut(String destination, VoyageStatus statut);
 
 
-    @Query("SELECT v FROM Voyage v WHERE " +
+    @Query("SELECT v FROM Voyages v WHERE " +
             "LOWER(v.nom) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(v.destination) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(v.itineraire) LIKE LOWER(CONCAT('%', :search, '%'))")
@@ -44,7 +44,7 @@ public interface VoyageRepository extends JpaRepository<Voyages, Long> {
 
     List<Voyages> findAllByStatutOrderByDateDepartAsc(VoyageStatus statut);
 
-    @Query("SELECT v FROM Voyage v WHERE v.dateDepart >= :dateDepart")
+    @Query("SELECT v FROM Voyages v WHERE v.dateDepart >= :dateDepart")
     List<Voyages> findByDateDepartAfter(@Param("dateDepart") String dateDepart);
 
     @Query("SELECT v FROM Voyages v WHERE LOWER(v.destination) LIKE LOWER(CONCAT('%', :destination, '%'))")

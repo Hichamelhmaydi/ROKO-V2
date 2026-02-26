@@ -80,4 +80,7 @@ public class Voyages {
         activite.getActivitesVoyages().removeIf(av ->
                 av.getVoyage().equals(this) && av.getActivite().equals(activite));
     }
+
+    @OneToMany(mappedBy = "voyage", fetch = FetchType.LAZY)
+    private List<Activites> activites;
 }
