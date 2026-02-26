@@ -46,4 +46,16 @@ public interface VoyageRepository extends JpaRepository<Voyages, Long> {
 
     @Query("SELECT v FROM Voyage v WHERE v.dateDepart >= :dateDepart")
     List<Voyages> findByDateDepartAfter(@Param("dateDepart") String dateDepart);
+
+    @Query("SELECT v FROM Voyages v WHERE LOWER(v.destination) LIKE LOWER(CONCAT('%', :destination, '%'))")
+    List<Voyages> searchByDestination(@Param("destination") String destination);
+
+    boolean existsByDestination(String destination);
+
+    @Query("SELECT DISTINCT v FROM Voyages v LEFT JOIN FETCH v.activites WHERE v.id = :id")
+    Optional<Voyages> findByIdWithActivites(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT v FROM Voyages v LEFT JOIN FETCH v.activites")
+    List<Voyages> findAllWithActivites();
+
 }
