@@ -23,8 +23,17 @@ public class ActiviteMapper {
         dto.setDescription(activite.getDescription());
         dto.setVoyageId(activite.getVoyage() != null ? activite.getVoyage().getId() : null);
 
+        if (activite.getVoyage() != null) {
+            dto.setVoyageNom(activite.getVoyage().getDestination());
+        }
+
+        if (activite.getReservations() != null) {
+            dto.setNombreReservations(activite.getReservations().size());
+        }
+
         return dto;
     }
+
 
     public Activites toEntity(ActiviteDTO dto) {
         if (dto == null) {
@@ -36,7 +45,6 @@ public class ActiviteMapper {
         activite.setNom(dto.getNom());
         activite.setDescription(dto.getDescription());
 
-        // Le voyage sera set séparément dans le service
         if (dto.getVoyageId() != null) {
             Voyages voyage = new Voyages();
             voyage.setId(dto.getVoyageId());
@@ -55,6 +63,7 @@ public class ActiviteMapper {
                 .collect(Collectors.toList());
     }
 
+
     public List<Activites> toEntityList(List<ActiviteDTO> dtos) {
         if (dtos == null) {
             return new ArrayList<>();
@@ -62,5 +71,18 @@ public class ActiviteMapper {
         return dtos.stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
+    }
+
+    public void updateEntityFromDTO(ActiviteDTO dto, Activites activite) {
+        if (dto == null || activite == null) {
+            return;
+        }
+
+        if (dto.getNom() != null) {
+            activite.setNom(dto.getNom());
+        }
+        if (dto.getDescription() != null) {
+            activite.setDescription(dto.getDescription());
+        }
     }
 }
