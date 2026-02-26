@@ -1,4 +1,4 @@
-package com.example.ROKO.controller;
+package com.example.roko.controller;
 
 public class ActivitesController {
 }

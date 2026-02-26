@@ -22,7 +22,7 @@ public class VoyageService {
 
     public VoyageDTO createVoyage(VoyageDTO voyageDTO) {
         Voyages voyage = voyageMapper.toEntity(voyageDTO);
-        voyage.setStatut(VoyageStatus.DISPONIBLE); // Par défaut disponible
+        voyage.setStatut(VoyageStatus.DISPONIBLE); 
 
         Voyages savedVoyage = voyageRepository.save(voyage);
         return voyageMapper.toDTO(savedVoyage);
