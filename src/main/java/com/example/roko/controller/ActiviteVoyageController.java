@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -26,7 +25,6 @@ public class ActiviteVoyageController {
 
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteVoyageDTO> associerActiviteAVoyage(
             @Valid @RequestBody ActiviteVoyageDTO dto) {
         log.info("Requête POST /api/activites-voyages - Association activité-voyage");
@@ -45,7 +43,6 @@ public class ActiviteVoyageController {
 
 
     @GetMapping("/activite/{activiteId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ActiviteVoyageDTO>> getVoyagesByActivite(
             @PathVariable Long activiteId) {
         log.info("Requête GET /api/activites-voyages/activite/{}", activiteId);
@@ -82,7 +79,6 @@ public class ActiviteVoyageController {
 
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteVoyageDTO> updateAssociation(
             @PathVariable Long id,
             @Valid @RequestBody ActiviteVoyageDTO dto) {
@@ -93,7 +89,6 @@ public class ActiviteVoyageController {
 
 
     @DeleteMapping("/activite/{activiteId}/voyage/{voyageId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> dissocierActiviteDeVoyage(
             @PathVariable Long activiteId,
             @PathVariable Long voyageId) {
@@ -111,7 +106,6 @@ public class ActiviteVoyageController {
 
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteAssociation(@PathVariable Long id) {
         log.info("Requête DELETE /api/activites-voyages/{}", id);
         activiteVoyageService.deleteAssociation(id);

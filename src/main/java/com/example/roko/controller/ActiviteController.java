@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -24,7 +23,6 @@ public class ActiviteController {
     private final ActiviteService activiteService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteDTO> createActivite(@Valid @RequestBody ActiviteDTO activiteDTO) {
         log.info("Requête POST /api/activites - Création d'une activité: {}", activiteDTO.getNom());
         ActiviteDTO createdActivite = activiteService.createActivite(activiteDTO);
@@ -49,7 +47,6 @@ public class ActiviteController {
 
 
     @GetMapping("/{id}/details")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteDTO> getActiviteByIdWithReservations(@PathVariable Long id) {
         log.info("Requête GET /api/activites/{}/details - Récupération avec réservations", id);
         ActiviteDTO activite = activiteService.getActiviteByIdWithReservations(id);
@@ -66,7 +63,6 @@ public class ActiviteController {
 
 
     @GetMapping("/voyage/{voyageId}/details")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ActiviteDTO>> getActivitesByVoyageIdWithReservations(@PathVariable Long voyageId) {
         log.info("Requête GET /api/activites/voyage/{}/details - Avec réservations", voyageId);
         List<ActiviteDTO> activites = activiteService.getActivitesByVoyageIdWithReservations(voyageId);
@@ -97,7 +93,6 @@ public class ActiviteController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteDTO> updateActivite(
             @PathVariable Long id,
             @Valid @RequestBody ActiviteDTO activiteDTO) {
@@ -108,7 +103,6 @@ public class ActiviteController {
 
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteActivite(@PathVariable Long id) {
         log.info("Requête DELETE /api/activites/{} - Suppression de l'activité", id);
         activiteService.deleteActivite(id);
@@ -122,7 +116,6 @@ public class ActiviteController {
 
 
     @DeleteMapping("/{id}/force")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> forceDeleteActivite(@PathVariable Long id) {
         log.warn("Requête DELETE /api/activites/{}/force - Suppression forcée", id);
         activiteService.forceDeleteActivite(id);
