@@ -1,8 +1,12 @@
 package com.example.roko.enums;
 
-public enum ReservationStatus {
+public enum ReservationStatut {
     CREE,
-    PAYE,
-    ANNULE,
-    ECHEC
+    PAYEE,
+    ANNULEE,
+    ECHEC,
+    EN_ATTENTE,
+    EN_ATTENTE_PAIEMENT,
+    CONFIRMEE,
+    COMPLETEE
 }
