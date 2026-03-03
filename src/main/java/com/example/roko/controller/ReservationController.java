@@ -2,6 +2,7 @@ package com.example.roko.controller;
 
 import com.example.roko.dto.ReservationDTO;
 import com.example.roko.enums.ReservationStatut;
+import com.example.roko.security.UserPrincipal;
 import com.example.roko.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
@@ -29,7 +29,6 @@ import java.util.Map;
 public class ReservationController {
 
     private final ReservationService reservationService;
-
 
     @PostMapping
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
@@ -44,7 +43,6 @@ public class ReservationController {
         ReservationDTO createdReservation = reservationService.createReservation(reservationDTO, userId);
         return new ResponseEntity<>(createdReservation, HttpStatus.CREATED);
     }
-
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -64,7 +62,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
     public ResponseEntity<ReservationDTO> getReservationById(
@@ -80,7 +77,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservation);
     }
 
-
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
     public ResponseEntity<List<ReservationDTO>> getMyReservations(Authentication authentication) {
@@ -92,7 +88,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-
     @GetMapping("/voyage/{voyageId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ReservationDTO>> getReservationsByVoyage(@PathVariable Long voyageId) {
@@ -101,7 +96,6 @@ public class ReservationController {
         List<ReservationDTO> reservations = reservationService.getReservationsByVoyage(voyageId);
         return ResponseEntity.ok(reservations);
     }
-
 
     @GetMapping("/statut/{statut}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -114,7 +108,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-
     @GetMapping("/en-attente")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ReservationDTO>> getReservationsEnAttente() {
@@ -125,7 +118,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-
     @GetMapping("/recentes")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ReservationDTO>> getRecentReservations() {
@@ -135,7 +127,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-
     @PutMapping("/{id}/confirmer")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReservationDTO> confirmerReservation(@PathVariable Long id) {
@@ -144,7 +135,6 @@ public class ReservationController {
         ReservationDTO reservation = reservationService.confirmerReservation(id);
         return ResponseEntity.ok(reservation);
     }
-
 
     @PutMapping("/{id}/annuler")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
@@ -172,7 +162,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservation);
     }
 
-
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
     public ResponseEntity<ReservationDTO> updateReservation(
@@ -190,7 +179,6 @@ public class ReservationController {
         return ResponseEntity.ok(updatedReservation);
     }
 
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteReservation(@PathVariable Long id) {
@@ -205,7 +193,6 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/count/statut/{statut}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Long>> countByStatut(@PathVariable ReservationStatut statut) {
@@ -219,7 +206,6 @@ public class ReservationController {
 
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/me/count")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
@@ -246,12 +232,11 @@ public class ReservationController {
 
 
     private Long getUserIdFromAuthentication(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
-            return ((UserDetailsImpl) authentication.getPrincipal()).getId();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {
+            return ((UserPrincipal) authentication.getPrincipal()).getId();
         }
         throw new RuntimeException("Impossible de récupérer l'ID de l'utilisateur");
     }
-
 
     private boolean isAdmin(Authentication authentication) {
         if (authentication == null) {
