@@ -1,16 +1,14 @@
 package com.example.roko.service;
 
 import com.example.roko.dto.VoyageurDTO;
-import com.example.roko.mapper.VoyageurMapper;
 import com.example.roko.entity.Voyageurs;
 import com.example.roko.enums.CompteStatus;
+import com.example.roko.mapper.VoyageurMapper;
 import com.example.roko.repository.VoyageurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +25,6 @@ public class VoyageurService {
 
         Voyageurs voyageur = voyageurMapper.toEntity(voyageurDTO);
         voyageur.setStatus(CompteStatus.ACTIVER);
-
         Voyageurs savedVoyageur = voyageurRepository.save(voyageur);
         return voyageurMapper.toDTO(savedVoyageur);
     }

@@ -1,14 +1,15 @@
 package com.example.roko.service;
 
 import com.example.roko.dto.UserDTO;
+import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
+import com.example.roko.entity.Voyageurs;
 import com.example.roko.enums.CompteStatus;
 import com.example.roko.mapper.UserMapper;
 import com.example.roko.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,18 +20,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
-    public UserDTO createUser(UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("Un utilisateur avec cet email existe déjà");
-        }
-
-        User user = userMapper.toEntity(userDTO);
-        user.setStatus(CompteStatus.ACTIVER); // Par défaut actif
-
-        User savedUser = userRepository.save(user);
-        return userMapper.toDTO(savedUser);
-    }
 
     @Transactional(readOnly = true)
     public UserDTO getUserById(Long id) {
@@ -118,7 +107,6 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + id));
 
-        // TODO: Hash the password before saving
         user.setPassword(newPassword);
 
         User updatedUser = userRepository.save(user);
@@ -150,5 +138,17 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDTO> getAdmins() {
+        List<User> admins = userRepository.findByUserType(Admin.class);
+        return admins.stream().map(userMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDTO> getVoyageurs() {
+        List<User> voyageurs = userRepository.findByUserType(Voyageurs.class);
+        return voyageurs.stream().map(userMapper::toDTO).collect(Collectors.toList());
     }
 }

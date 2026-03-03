@@ -1,9 +1,9 @@
 package com.example.roko.mapper;
 
 import com.example.roko.dto.UserDTO;
+import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
 import com.example.roko.entity.Voyageurs;
-import com.example.roko.entity.Admin;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,7 +25,7 @@ public class UserMapper {
         if (user instanceof Voyageurs) {
             dto.setRole("VOYAGEUR");
         } else if (user instanceof Admin) {
-            dto.setRole("ADMINISTRATEUR");
+            dto.setRole("ADMIN");
         } else {
             dto.setRole("USER");
         }
@@ -34,17 +34,6 @@ public class UserMapper {
     }
 
     public User toEntity(UserDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        User user = new User();
-        user.setId(dto.getId());
-        user.setNom(dto.getNom());
-        user.setPrenom(dto.getPrenom());
-        user.setEmail(dto.getEmail());
-        user.setTelephone(dto.getTelephone());
-
-        return user;
+        throw new UnsupportedOperationException("Utilisez un mapper spécifique (VoyageurMapper ou AdminMapper) pour créer une entité.");
     }
 }

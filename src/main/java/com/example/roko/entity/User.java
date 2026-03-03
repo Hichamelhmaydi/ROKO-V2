@@ -5,18 +5,16 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
 
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public abstract class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,17 +47,7 @@ public class User {
     @Column(nullable = false)
     private Boolean bloque = false;
 
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Reservations> reservations = new HashSet<>();
+    @Enumerated(EnumType.STRING)
     private CompteStatus status;
 
     @PrePersist
@@ -67,14 +55,8 @@ public class User {
         if (dateInscription == null) {
             dateInscription = LocalDateTime.now();
         }
-    }
-
-    public void setStatus(CompteStatus status) {
-
-        this.status = status;
-    }
-
-    public CompteStatus getStatus() {
-        return status;
+        if (status == null) {
+            status = CompteStatus.ACTIVER;
+        }
     }
 }
