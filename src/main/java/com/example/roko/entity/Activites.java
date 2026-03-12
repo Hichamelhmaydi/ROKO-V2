@@ -28,9 +28,10 @@ public class Activites {
     @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Activites_Voyages> activitesVoyages = new HashSet<>();
 
-    @ManyToMany(mappedBy = "activites")
-    private Set<Reservations> reservations = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voyage_id", nullable = false)
     private Voyages voyage;
+
+    @ManyToMany(mappedBy = "activites")
+    private Set<Reservations> reservations = new HashSet<>();
 }

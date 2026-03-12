@@ -52,10 +52,16 @@ public interface VoyageRepository extends JpaRepository<Voyages, Long> {
 
     boolean existsByDestination(String destination);
 
-    @Query("SELECT DISTINCT v FROM Voyages v LEFT JOIN FETCH v.activites WHERE v.id = :id")
+    @Query("SELECT v FROM Voyages v " +
+            "LEFT JOIN FETCH v.activitesVoyages av " +
+            "LEFT JOIN FETCH av.activite " +
+            "WHERE v.id = :id")
     Optional<Voyages> findByIdWithActivites(@Param("id") Long id);
 
-    @Query("SELECT DISTINCT v FROM Voyages v LEFT JOIN FETCH v.activites")
+
+    @Query("SELECT DISTINCT v FROM Voyages v " +
+            "LEFT JOIN FETCH v.activitesVoyages av " +
+            "LEFT JOIN FETCH av.activite")
     List<Voyages> findAllWithActivites();
 
 }

@@ -14,12 +14,11 @@ import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Service
 @Slf4j
 public class StripeService {
 
-    @Value("${stripe.api.key}")
+    @Value("${stripe.api.key:}")
     private String stripeApiKey;
 
     @Value("${stripe.success.url:http://localhost:4200/payment/success}")
@@ -30,10 +29,14 @@ public class StripeService {
 
     @PostConstruct
     public void init() {
+        if (stripeApiKey == null || stripeApiKey.isBlank()) {
+            log.warn("Clé Stripe absente: les endpoints de paiement Stripe seront indisponibles tant que stripe.api.key n'est pas configurée");
+            return;
+        }
+
         Stripe.apiKey = stripeApiKey;
         log.info("Stripe API initialisée avec succès");
     }
-
 
     public Session createCheckoutSession(
             Long reservationId,
@@ -78,18 +81,15 @@ public class StripeService {
         return session;
     }
 
-
     public Session retrieveSession(String sessionId) throws StripeException {
         log.info("Récupération de la session Stripe {}", sessionId);
         return Session.retrieve(sessionId);
     }
 
-
     public String getSessionStatus(String sessionId) throws StripeException {
         Session session = Session.retrieve(sessionId);
         return session.getPaymentStatus();
     }
-
 
     public Refund createRefund(String paymentIntentId, Double amount, String reason) throws StripeException {
         log.info("Création d'un remboursement pour le paiement {}", paymentIntentId);
@@ -110,7 +110,6 @@ public class StripeService {
         return refund;
     }
 
-
     public boolean isSessionExpired(String sessionId) throws StripeException {
         Session session = Session.retrieve(sessionId);
         Long expiresAt = session.getExpiresAt();
@@ -122,12 +121,10 @@ public class StripeService {
         return System.currentTimeMillis() / 1000 > expiresAt;
     }
 
-
     public Map<String, String> getSessionMetadata(String sessionId) throws StripeException {
         Session session = Session.retrieve(sessionId);
         return session.getMetadata() != null ? session.getMetadata() : new HashMap<>();
     }
-
 
     public String getPaymentIntentId(String sessionId) throws StripeException {
         Session session = Session.retrieve(sessionId);

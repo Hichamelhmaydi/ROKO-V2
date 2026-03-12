@@ -41,10 +41,10 @@ public abstract class User {
     @Column(name = "date_inscription")
     private LocalDateTime dateInscription;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     private Boolean actif = true;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private Boolean bloque = false;
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +54,12 @@ public abstract class User {
     public void prePersist() {
         if (dateInscription == null) {
             dateInscription = LocalDateTime.now();
+        }
+        if (actif == null) {
+            actif = true;
+        }
+        if (bloque == null) {
+            bloque = false;
         }
         if (status == null) {
             status = CompteStatus.ACTIVER;

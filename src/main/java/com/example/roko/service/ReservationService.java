@@ -75,7 +75,10 @@ public class ReservationService {
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "Activité non trouvée avec l'ID: " + activiteId));
 
-                if (!activite.getVoyage().getId().equals(voyage.getId())) {
+                boolean appartientAuVoyage = activite.getActivitesVoyages().stream()
+                        .anyMatch(av -> av.getVoyage().getId().equals(voyage.getId()));
+
+                if (!appartientAuVoyage) {
                     throw new BusinessException(
                             "L'activité " + activite.getNom() + " n'appartient pas à ce voyage");
                 }
