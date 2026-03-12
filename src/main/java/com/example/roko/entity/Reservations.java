@@ -88,7 +88,15 @@ public class Reservations {
     private LocalDateTime datePaiement;
 
 
+
     @PrePersist
+    public void prePersist() {
+        if (dateReservation == null) {
+            dateReservation = LocalDateTime.now();
+        }
+        calculerMontantTotal();
+    }
+
     @PreUpdate
     public void calculerMontantTotal() {
         if (prixBase != null && nombrePersonnes != null) {
@@ -97,11 +105,4 @@ public class Reservations {
             this.montantTotal = montantBase.add(montantActivites);
         }
     }
-
-    @PrePersist
-    public void prePersist() {
-        if (dateReservation == null) {
-            dateReservation = LocalDateTime.now();
-        }
-    }
-}
+}

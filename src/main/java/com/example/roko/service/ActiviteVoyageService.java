@@ -4,7 +4,6 @@ import com.example.roko.dto.ActiviteVoyageDTO;
 import com.example.roko.entity.Activites;
 import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.entity.Voyages;
-import com.example.roko.entity.Voyages;
 import com.example.roko.exception.BusinessException;
 import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.repository.ActiviteRepository;

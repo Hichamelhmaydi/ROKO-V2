@@ -5,10 +5,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import  java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -81,6 +80,5 @@ public class Voyages {
                 av.getVoyage().equals(this) && av.getActivite().equals(activite));
     }
 
-    @OneToMany(mappedBy = "voyage", fetch = FetchType.LAZY)
-    private List<Activites> activites;
+
 }

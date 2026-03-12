@@ -1,5 +1,6 @@
 package com.example.roko.service;
 
+import com.example.roko.dto.CreateUserRequest;
 import com.example.roko.dto.UserDTO;
 import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
@@ -8,6 +9,7 @@ import com.example.roko.enums.CompteStatus;
 import com.example.roko.mapper.UserMapper;
 import com.example.roko.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -20,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public UserDTO getUserById(Long id) {
@@ -150,5 +153,22 @@ public class UserService {
     public List<UserDTO> getVoyageurs() {
         List<User> voyageurs = userRepository.findByUserType(Voyageurs.class);
         return voyageurs.stream().map(userMapper::toDTO).collect(Collectors.toList());
+    }
+
+
+    public UserDTO createUser(CreateUserRequest userDTO) {
+
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new RuntimeException("Un utilisateur avec cet email existe déjà");
+        }
+
+        User user = userMapper.toEntity(userDTO);
+
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setStatus(CompteStatus.ACTIVER);
+
+        User savedUser = userRepository.save(user);
+
+        return userMapper.toDTO(savedUser);
     }
 }

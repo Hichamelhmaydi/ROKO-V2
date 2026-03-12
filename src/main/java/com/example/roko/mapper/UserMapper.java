@@ -1,5 +1,6 @@
 package com.example.roko.mapper;
 
+import com.example.roko.dto.CreateUserRequest;
 import com.example.roko.dto.UserDTO;
 import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
@@ -33,7 +34,7 @@ public class UserMapper {
         return dto;
     }
 
-    public User toEntity(UserDTO dto) {
+    public User toEntity(CreateUserRequest dto) {
         throw new UnsupportedOperationException("Utilisez un mapper spécifique (VoyageurMapper ou AdminMapper) pour créer une entité.");
     }
 }
