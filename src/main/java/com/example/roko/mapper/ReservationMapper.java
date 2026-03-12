@@ -28,7 +28,7 @@ public class ReservationMapper {
 
         ReservationDTO dto = new ReservationDTO();
         dto.setId(reservation.getId());
-        dto.setUserId(reservation.getUser() != null ? reservation.getUser().getId() : null);
+        dto.setUserId(reservation.getVoyageur() != null ? reservation.getVoyageur().getId() : null);
         dto.setVoyageId(reservation.getVoyage() != null ? reservation.getVoyage().getId() : null);
         dto.setNombrePersonnes(reservation.getNombrePersonnes());
         dto.setStatut(reservation.getStatut());
@@ -51,10 +51,10 @@ public class ReservationMapper {
             dto.setVoyageDateRetour(reservation.getVoyage().getDateRetour());
         }
 
-        if (reservation.getUser() != null) {
-            dto.setUserNom(reservation.getUser().getNom());
-            dto.setUserPrenom(reservation.getUser().getPrenom());
-            dto.setUserEmail(reservation.getUser().getEmail());
+        if (reservation.getVoyageur() != null) {
+            dto.setUserNom(reservation.getVoyageur().getNom());
+            dto.setUserPrenom(reservation.getVoyageur().getPrenom());
+            dto.setUserEmail(reservation.getVoyageur().getEmail());
         }
 
         if (reservation.getActivites() != null && !reservation.getActivites().isEmpty()) {

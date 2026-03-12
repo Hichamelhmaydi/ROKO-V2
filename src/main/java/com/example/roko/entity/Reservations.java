@@ -25,8 +25,8 @@ public class Reservations {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "voyageur_id", nullable = false)
+    private Voyageurs voyageur;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voyage_id", nullable = false)
@@ -105,4 +105,4 @@ public class Reservations {
             this.montantTotal = montantBase.add(montantActivites);
         }
     }
-}
+}

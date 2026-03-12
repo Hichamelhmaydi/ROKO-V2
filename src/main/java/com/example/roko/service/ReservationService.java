@@ -1,10 +1,7 @@
 package com.example.roko.service;
 
 import com.example.roko.dto.ReservationDTO;
-import com.example.roko.entity.Activites;
-import com.example.roko.entity.Reservations;
-import com.example.roko.entity.User;
-import com.example.roko.entity.Voyages;
+import com.example.roko.entity.*;
 import com.example.roko.enums.ReservationStatut;
 import com.example.roko.exception.BusinessException;
 import com.example.roko.exception.ResourceNotFoundException;
@@ -42,9 +39,10 @@ public class ReservationService {
         log.info("Création d'une réservation pour l'utilisateur {} et le voyage {}",
                 userId, reservationDTO.getVoyageId());
 
-        User user = userRepository.findById(userId)
+        Voyageurs voyageur = (Voyageurs) userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Utilisateur non trouvé avec l'ID: " + userId));
+
 
         Voyages voyage = voyageRepository.findById(reservationDTO.getVoyageId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -55,7 +53,7 @@ public class ReservationService {
         }
 
         Reservations reservation = new Reservations();
-        reservation.setUser(user);
+        reservation.setVoyageur(voyageur);
         reservation.setVoyage(voyage);
         reservation.setNombrePersonnes(reservationDTO.getNombrePersonnes());
         reservation.setCommentaire(reservationDTO.getCommentaire());
@@ -114,7 +112,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Réservation non trouvée avec l'ID: " + id));
 
-        if (!isAdmin && !reservation.getUser().getId().equals(userId)) {
+        if (!isAdmin && !reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas accès à cette réservation");
         }
 
@@ -179,7 +177,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Réservation non trouvée avec l'ID: " + id));
 
-        if (!isAdmin && !reservation.getUser().getId().equals(userId)) {
+        if (!isAdmin && !reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas le droit d'annuler cette réservation");
         }
 
@@ -230,7 +228,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Réservation non trouvée avec l'ID: " + id));
 
-        if (!isAdmin && !reservation.getUser().getId().equals(userId)) {
+        if (!isAdmin && !reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas le droit de modifier cette réservation");
         }
 

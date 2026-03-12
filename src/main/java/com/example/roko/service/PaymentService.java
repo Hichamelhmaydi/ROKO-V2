@@ -47,7 +47,7 @@ public class PaymentService {
                         "Réservation non trouvée avec l'ID: " + reservationId));
 
         // Vérifier que l'utilisateur est propriétaire de la réservation
-        if (!reservation.getUser().getId().equals(userId)) {
+        if (!reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas accès à cette réservation");
         }
 
@@ -67,7 +67,7 @@ public class PaymentService {
                     reservationId,
                     reservation.getMontantTotal().doubleValue(),
                     "EUR",
-                    reservation.getUser().getEmail(),
+                    reservation.getVoyageur().getEmail(),
                     "Voyage " + reservation.getVoyage().getNom() + " pour " +
                             reservation.getNombrePersonnes() + " personne(s)"
             );
