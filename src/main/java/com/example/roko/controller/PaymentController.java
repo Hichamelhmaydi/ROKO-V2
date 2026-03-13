@@ -1,6 +1,6 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.PaymentDTO;
+import com.example.roko.dto.response.PaymentDTO;
 import com.example.roko.enums.PaymentStatus;
 import com.example.roko.security.UserPrincipal;
 import com.example.roko.service.PaymentService;

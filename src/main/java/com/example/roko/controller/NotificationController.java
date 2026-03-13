@@ -1,6 +1,6 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.NotificationDTO;
+import com.example.roko.dto.response.NotificationDTO;
 import com.example.roko.security.UserPrincipal;
 import com.example.roko.service.NotificationService;
 import lombok.RequiredArgsConstructor;

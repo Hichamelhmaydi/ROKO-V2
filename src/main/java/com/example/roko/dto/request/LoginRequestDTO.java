@@ -1,5 +1,5 @@
 
-package com.example.roko.dto;
+package com.example.roko.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

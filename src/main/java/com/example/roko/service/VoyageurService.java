@@ -1,6 +1,6 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.VoyageurDTO;
+import com.example.roko.dto.response.VoyageurDTO;
 import com.example.roko.entity.Voyageurs;
 import com.example.roko.enums.CompteStatus;
 import com.example.roko.mapper.VoyageurMapper;

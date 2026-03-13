@@ -1,6 +1,6 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.VoyageurDTO;
+import com.example.roko.dto.response.VoyageurDTO;
 import com.example.roko.enums.CompteStatus;
 import com.example.roko.service.VoyageurService;
 import lombok.RequiredArgsConstructor;

@@ -1,20 +1,19 @@
-package com.example.roko.dto;
+package com.example.roko.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class VoyageurDTO {
     private Long id;
     private String nom;
     private String prenom;
     private String email;
     private String telephone;
     private String status;
-    private String role;
+    private String idNational;
+    private String dateExpiration;
 }
-

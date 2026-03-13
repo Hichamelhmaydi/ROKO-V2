@@ -1,6 +1,6 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.ActiviteDTO;
+import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
 import com.example.roko.entity.Voyages;
 import com.example.roko.exception.ResourceNotFoundException;

@@ -1,6 +1,6 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.AdminDashboardDTO;
+import com.example.roko.dto.response.AdminDashboardDTO;
 import com.example.roko.service.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

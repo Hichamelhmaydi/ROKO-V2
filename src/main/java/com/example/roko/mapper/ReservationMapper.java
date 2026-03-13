@@ -1,7 +1,7 @@
 package com.example.roko.mapper;
 
-import com.example.roko.dto.ActiviteDTO;
-import com.example.roko.dto.ReservationDTO;
+import com.example.roko.dto.response.ActiviteDTO;
+import com.example.roko.dto.response.ReservationDTO;
 import com.example.roko.entity.Activites;
 import com.example.roko.entity.Reservations;
 import org.springframework.stereotype.Component;

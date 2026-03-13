@@ -1,6 +1,6 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.ReservationDTO;
+import com.example.roko.dto.response.ReservationDTO;
 import com.example.roko.entity.*;
 import com.example.roko.enums.ReservationStatut;
 import com.example.roko.exception.BusinessException;

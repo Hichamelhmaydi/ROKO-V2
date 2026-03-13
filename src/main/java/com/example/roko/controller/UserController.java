@@ -1,13 +1,13 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.UserDTO;
+import com.example.roko.dto.response.UserDTO;
 import com.example.roko.enums.CompteStatus;
 import com.example.roko.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.roko.dto.CreateUserRequest;
+import com.example.roko.dto.request.CreateUserRequest;
 
 import java.util.List;
 import java.util.Map;

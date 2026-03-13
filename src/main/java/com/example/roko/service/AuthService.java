@@ -1,8 +1,8 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.AuthResponseDTO;
-import com.example.roko.dto.LoginRequestDTO;
-import com.example.roko.dto.RegisterRequestDTO;
+import com.example.roko.dto.response.AuthResponseDTO;
+import com.example.roko.dto.request.LoginRequestDTO;
+import com.example.roko.dto.request.RegisterRequestDTO;
 import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
 import com.example.roko.entity.Voyageurs;

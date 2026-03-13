@@ -1,6 +1,6 @@
 package com.example.roko.mapper;
 
-import com.example.roko.dto.AdminDTO;
+import com.example.roko.dto.response.AdminDTO;
 import com.example.roko.entity.Admin;
 import com.example.roko.enums.CompteStatus;
 import org.springframework.stereotype.Component;

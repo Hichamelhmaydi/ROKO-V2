@@ -1,6 +1,6 @@
 package com.example.roko.mapper;
 
-import com.example.roko.dto.ActiviteDTO;
+import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
 import com.example.roko.entity.Activites_Voyages;
 import org.springframework.stereotype.Component;

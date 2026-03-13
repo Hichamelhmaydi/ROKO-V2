@@ -1,7 +1,7 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.CreateUserRequest;
-import com.example.roko.dto.UserDTO;
+import com.example.roko.dto.request.CreateUserRequest;
+import com.example.roko.dto.response.UserDTO;
 import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
 import com.example.roko.entity.Voyageurs;

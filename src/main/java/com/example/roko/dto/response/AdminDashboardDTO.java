@@ -1,4 +1,4 @@
-package com.example.roko.dto;
+package com.example.roko.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +21,4 @@ public class AdminDashboardDTO {
     private long totalVoyageurs;
     private long voyageursActifs;
     private long voyageursBloques;
-
-    private long avisEnAttente;
-    private long avisValides;
-    private long avisRefuses;
 }

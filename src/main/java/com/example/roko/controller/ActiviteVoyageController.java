@@ -1,6 +1,6 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.ActiviteVoyageDTO;
+import com.example.roko.dto.response.ActiviteVoyageDTO;
 import com.example.roko.service.ActiviteVoyageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

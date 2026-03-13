@@ -1,5 +1,5 @@
 
-package com.example.roko.dto;
+package com.example.roko.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

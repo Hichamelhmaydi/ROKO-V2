@@ -64,7 +64,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/voyages/**").permitAll()
                 .requestMatchers("/api/activites/**").permitAll()
-                .requestMatchers("/api/avis/voyage/**").permitAll()
                 // Admin only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
@@ -73,7 +72,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/reservations/**").authenticated()
                 .requestMatchers("/api/paiements/**").authenticated()
                 .requestMatchers("/api/notifications/**").authenticated()
-                .requestMatchers("/api/avis/**").authenticated()
                 // All other requests
                 .anyRequest().authenticated()
                 )

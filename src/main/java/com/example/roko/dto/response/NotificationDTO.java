@@ -1,4 +1,4 @@
-package com.example.roko.dto;
+package com.example.roko.dto.response;
 
 import com.example.roko.enums.NotificationType;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.ActiviteVoyageDTO;
+import com.example.roko.dto.response.ActiviteVoyageDTO;
 import com.example.roko.entity.Activites;
 import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.entity.Voyages;

@@ -1,6 +1,6 @@
 package com.example.roko.service;
 
-import com.example.roko.dto.NotificationDTO;
+import com.example.roko.dto.response.NotificationDTO;
 import com.example.roko.entity.Notifications;
 import com.example.roko.entity.User;
 import com.example.roko.enums.NotificationType;

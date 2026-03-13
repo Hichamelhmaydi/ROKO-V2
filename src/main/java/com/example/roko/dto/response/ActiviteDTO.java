@@ -1,4 +1,4 @@
-package com.example.roko.dto;
+package com.example.roko.dto.response;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

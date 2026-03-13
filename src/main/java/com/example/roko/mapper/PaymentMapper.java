@@ -1,6 +1,6 @@
 package com.example.roko.mapper;
 
-import com.example.roko.dto.PaymentDTO;
+import com.example.roko.dto.response.PaymentDTO;
 import com.example.roko.entity.Payment;
 import com.example.roko.entity.Reservations;
 import com.example.roko.enums.PaymentStatus;

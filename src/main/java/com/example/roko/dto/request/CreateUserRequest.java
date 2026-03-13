@@ -1,4 +1,4 @@
-package com.example.roko.dto;
+package com.example.roko.dto.request;
 
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package com.example.roko.mapper;
 
-import com.example.roko.dto.VoyageDTO;
+import com.example.roko.dto.response.VoyageDTO;
 import com.example.roko.entity.Voyages;
 import com.example.roko.enums.VoyageStatus;
 import org.springframework.stereotype.Component;

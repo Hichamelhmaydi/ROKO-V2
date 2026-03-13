@@ -25,7 +25,6 @@ RESERVATION_ID =
 PAYMENT_ID =
 USER_ID =
 VOYAGEUR_ID =
-AVIS_ID =
 NOTIFICATION_ID =
 ```
 
@@ -58,7 +57,6 @@ Accept: application/json
 - `/api/auth/register`
 - `/api/voyages/**`
 - `/api/activites/**`
-- `/api/avis/voyage/**` (avis validés d'un voyage)
 
 ### Admin seulement
 
@@ -66,7 +64,6 @@ Accept: application/json
 - `/api/admin/**`
 - `/api/admin/dashboard` (statistiques tableau de bord)
 - plusieurs endpoints réservations et paiements avec `@PreAuthorize("hasRole('ADMIN')")`
-- `/api/avis/moderation` et `/api/avis/{id}/moderation`
 - `/api/voyageurs/{id}/block` et `/api/voyageurs/{id}/unblock`
 - `/api/reservations/user/{userId}`
 
@@ -77,7 +74,6 @@ Accept: application/json
 - `/api/activites-voyages/**`
 - `/api/paiements/**`
 - `/api/notifications/**`
-- `/api/avis/**` (sauf les routes publiques ci-dessus)
 
 ### Important
 
@@ -127,14 +123,6 @@ ACTIVER
 DESACTIVER
 ```
 
-### `AvisStatus`
-
-```text
-EN_ATTENTE
-VALIDE
-REFUSE
-```
-
 ### `NotificationType`
 
 ```text
@@ -158,10 +146,8 @@ GENERAL
 8. Créer une session Stripe avec `/api/paiements/create-session`.
 9. Confirmer ou simuler l'échec de paiement.
 10. Consulter les notifications reçues avec `/api/notifications/me`.
-11. Après que la réservation est complétée, publier un avis avec `/api/avis`.
-12. Modérer l'avis (admin) avec `PUT /api/avis/{id}/moderation?statut=VALIDE`.
-13. Consulter le tableau de bord admin avec `/api/admin/dashboard`.
-14. Tester le blocage d'un voyageur avec `PATCH /api/voyageurs/{id}/block`.
+11. Consulter le tableau de bord admin avec `/api/admin/dashboard`.
+12. Tester le blocage d'un voyageur avec `PATCH /api/voyageurs/{id}/block`.
 
 ## 1. Authentification
 
@@ -948,7 +934,7 @@ Compte total des voyageurs.
 
 ### `PATCH {{BASE_URL}}/api/voyageurs/{{VOYAGEUR_ID}}/block`
 
-Bloque un voyageur (désactive le compte et empêche toute connexion, réservation et publication d'avis).
+Bloque un voyageur (désactive le compte et empêche toute connexion et réservation).
 
 Auth: `Bearer {{TOKEN_ADMIN}}`
 
@@ -1085,97 +1071,8 @@ Compte total des utilisateurs.
 
 Compte des utilisateurs inactifs.
 
-## 9. Avis & Évaluations
 
-### Règles métier importantes
-
-- Un voyageur ne peut publier un avis que si sa réservation pour ce voyage est au statut `COMPLETEE`.
-- Un avis publié passe en `EN_ATTENTE` jusqu'à modération par l'admin.
-- Seuls les avis `VALIDE` sont visibles publiquement via `GET /api/avis/voyage/{voyageId}`.
-- Un voyageur bloqué ne peut pas publier d'avis.
-
-### DTO `AvisDTO`
-
-```json
-{
-  "id": 1,
-  "voyageId": 1,
-  "voyageurId": 2,
-  "voyageNom": "Circuit Désert",
-  "voyageurNom": "Elhmaydi",
-  "voyageurPrenom": "Hicham",
-  "note": 5,
-  "commentaire": "Voyage exceptionnel, guide très professionnel.",
-  "statut": "EN_ATTENTE",
-  "dateCreation": "2026-03-13T10:00:00",
-  "dateModeration": null
-}
-```
-
-### `POST {{BASE_URL}}/api/avis`
-
-Publie un avis sur un voyage terminé.
-
-Auth: `Bearer {{TOKEN_VOYAGEUR}}`
-
-Body:
-
-```json
-{
-  "voyageId": {{VOYAGE_ID}},
-  "note": 5,
-  "commentaire": "Voyage exceptionnel, guide très professionnel."
-}
-```
-
-Réponse: `AvisDTO` avec `statut: "EN_ATTENTE"`.
-
-Script Postman pour enregistrer l'ID:
-
-```javascript
-const data = pm.response.json();
-pm.environment.set("AVIS_ID", data.id);
-```
-
-### `GET {{BASE_URL}}/api/avis/voyage/{{VOYAGE_ID}}`
-
-Liste des avis **validés** d'un voyage.
-
-Auth: non (public).
-
-### `GET {{BASE_URL}}/api/avis/me`
-
-Tous les avis du voyageur connecté (tous statuts).
-
-Auth: `Bearer {{TOKEN_VOYAGEUR}}`
-
-### `GET {{BASE_URL}}/api/avis/moderation?statut=EN_ATTENTE`
-
-Liste des avis selon leur statut de modération.
-
-Auth: `Bearer {{TOKEN_ADMIN}}`
-
-Valeurs possibles du paramètre `statut`: `EN_ATTENTE`, `VALIDE`, `REFUSE`.
-
-### `PUT {{BASE_URL}}/api/avis/{{AVIS_ID}}/moderation?statut=VALIDE`
-
-Modére un avis (valide ou refuse).
-
-Auth: `Bearer {{TOKEN_ADMIN}}`
-
-Pas de body — le statut est passé en query parameter.
-
-Valeurs possibles: `VALIDE` ou `REFUSE` (pas `EN_ATTENTE`).
-
-Réponse: `AvisDTO` mis à jour avec `dateModeration` renseignée.
-
-### `DELETE {{BASE_URL}}/api/avis/{{AVIS_ID}}`
-
-Supprime un avis (modération).
-
-Auth: `Bearer {{TOKEN_ADMIN}}`
-
-## 10. Notifications
+## 9. Notifications
 
 ### Description
 
@@ -1235,7 +1132,7 @@ Réponse: `204 No Content`.
 
 Erreur si la notification appartient à un autre utilisateur: `403 Forbidden`.
 
-## 11. Tableau de bord Admin
+## 10. Tableau de bord Admin
 
 ### `GET {{BASE_URL}}/api/admin/dashboard`
 
@@ -1258,10 +1155,7 @@ Réponse:
   "voyagesDisponibles": 5,
   "totalVoyageurs": 200,
   "voyageursActifs": 195,
-  "voyageursBloques": 5,
-  "avisEnAttente": 8,
-  "avisValides": 75,
-  "avisRefuses": 12
+  "voyageursBloques": 5
 }
 ```
 
@@ -1305,13 +1199,6 @@ const data = pm.response.json();
 pm.environment.set("STRIPE_SESSION_ID", data.sessionId);
 ```
 
-### Script Postman après publication d'un avis
-
-```javascript
-const data = pm.response.json();
-pm.environment.set("AVIS_ID", data.id);
-```
-
 ### Script Postman après lecture des notifications
 
 ```javascript
@@ -1338,8 +1225,6 @@ if (data.length > 0) {
 11. `POST /api/paiements/confirm`
 12. `GET /api/notifications/me` — notification de paiement reçue
 13. `GET /api/paiements/me`
-14. (après voyage complété) `POST /api/avis`
-15. `GET /api/avis/me`
 
 ### Flux admin complet
 
@@ -1353,11 +1238,9 @@ if (data.length > 0) {
 8. `GET /api/reservations`
 9. `PUT /api/reservations/{id}/confirmer`
 10. `PUT /api/reservations/{id}/completer`
-11. `GET /api/avis/moderation?statut=EN_ATTENTE`
-12. `PUT /api/avis/{id}/moderation?statut=VALIDE`
-13. `GET /api/paiements`
-14. `POST /api/paiements/{id}/rembourser`
-15. `PATCH /api/voyageurs/{id}/block` (si comportement inapproprié)
+11. `GET /api/paiements`
+12. `POST /api/paiements/{id}/rembourser`
+13. `PATCH /api/voyageurs/{id}/block` (si comportement inapproprié)
 
 ## Notes de validation
 
@@ -1366,8 +1249,6 @@ if (data.length > 0) {
 - Les dates des paiements par période doivent être passées en ISO date-time.
 - Les routes photo des voyages attendent un body brut de type chaîne JSON, pas un objet.
 - Le webhook Stripe est encore un stub de réception.
-- Un avis ne peut être soumis que si la réservation du voyageur pour ce voyage est `COMPLETEE`.
-- Un voyageur bloqué (`bloque: true`) ne peut plus se connecter (`isAccountNonLocked = false`) ni réserver ni publier d'avis.
+- Un voyageur bloqué (`bloque: true`) ne peut plus se connecter (`isAccountNonLocked = false`) ni réserver.
 - Les notifications sont créées automatiquement à chaque événement métier (réservation, paiement, annulation) ; aucune action manuelle admin requise.
 - Le dashboard admin (`GET /api/admin/dashboard`) agrège les données en une seule requête sans paramètre.
-- Les avis en attente de modération sont visibles uniquement via `GET /api/avis/moderation?statut=EN_ATTENTE` (admin).

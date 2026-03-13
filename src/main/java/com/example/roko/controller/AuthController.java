@@ -1,9 +1,9 @@
 package com.example.roko.controller;
 
-import com.example.roko.dto.AuthResponseDTO;
-import com.example.roko.dto.LoginRequestDTO;
-import com.example.roko.dto.MessageResponseDTO;
-import com.example.roko.dto.RegisterRequestDTO;
+import com.example.roko.dto.response.AuthResponseDTO;
+import com.example.roko.dto.request.LoginRequestDTO;
+import com.example.roko.dto.response.MessageResponseDTO;
+import com.example.roko.dto.request.RegisterRequestDTO;
 import com.example.roko.security.UserPrincipal;
 import com.example.roko.service.AuthService;
 import jakarta.validation.Valid;
