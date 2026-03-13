@@ -99,6 +99,20 @@ public class VoyageurService {
         return voyageurMapper.toDTO(updatedVoyageur);
     }
 
+    public VoyageurDTO setBlocked(Long id, boolean blocked) {
+        Voyageurs voyageur = voyageurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voyageur non trouvé avec l'ID: " + id));
+
+        voyageur.setBloque(blocked);
+        if (blocked) {
+            voyageur.setActif(false);
+            voyageur.setStatus(CompteStatus.DESACTIVER);
+        }
+
+        Voyageurs updatedVoyageur = voyageurRepository.save(voyageur);
+        return voyageurMapper.toDTO(updatedVoyageur);
+    }
+
     public void deleteVoyageur(Long id) {
         if (!voyageurRepository.existsById(id)) {
             throw new RuntimeException("Voyageur non trouvé avec l'ID: " + id);

@@ -54,8 +54,8 @@ public class ReservationController {
 
         log.info("Requête GET /api/reservations - Récupération de toutes les réservations");
 
-        Sort sort = sortDir.equalsIgnoreCase("ASC") ?
-                Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Sort sort = sortDir.equalsIgnoreCase("ASC")
+                ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ReservationDTO> reservations = reservationService.getAllReservations(pageable);
@@ -86,6 +86,13 @@ public class ReservationController {
         List<ReservationDTO> reservations = reservationService.getReservationsByUser(userId);
 
         return ResponseEntity.ok(reservations);
+    }
+
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ReservationDTO>> getReservationsByUserId(@PathVariable Long userId) {
+        log.info("Requête GET /api/reservations/user/{}", userId);
+        return ResponseEntity.ok(reservationService.getReservationsByUser(userId));
     }
 
     @GetMapping("/voyage/{voyageId}")
@@ -229,7 +236,6 @@ public class ReservationController {
         ReservationDTO reservation = reservationService.marquerCommePaye(id);
         return ResponseEntity.ok(reservation);
     }
-
 
     private Long getUserIdFromAuthentication(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {

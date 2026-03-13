@@ -80,4 +80,10 @@ public interface ReservationRepository extends JpaRepository<Reservations, Long>
 
     @Query("SELECT COUNT(r) > 0 FROM Reservations r WHERE r.voyageur.id = :userId AND r.voyage.id = :voyageId")
     boolean existsByUserIdAndVoyageId(@Param("userId") Long userId, @Param("voyageId") Long voyageId);
+
+    @Query("SELECT COUNT(r) > 0 FROM Reservations r WHERE r.voyageur.id = :userId AND r.voyage.id = :voyageId AND r.statut = :statut")
+    boolean existsByUserIdAndVoyageIdAndStatut(
+            @Param("userId") Long userId,
+            @Param("voyageId") Long voyageId,
+            @Param("statut") ReservationStatut statut);
 }

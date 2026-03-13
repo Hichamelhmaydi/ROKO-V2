@@ -6,6 +6,7 @@ import com.example.roko.service.VoyageurService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -101,6 +102,18 @@ public class VoyageurController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PatchMapping("/{id}/block")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<VoyageurDTO> blockVoyageur(@PathVariable Long id) {
+        return ResponseEntity.ok(voyageurService.setBlocked(id, true));
+    }
+
+    @PatchMapping("/{id}/unblock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<VoyageurDTO> unblockVoyageur(@PathVariable Long id) {
+        return ResponseEntity.ok(voyageurService.setBlocked(id, false));
     }
 
     @GetMapping("/stats/active")

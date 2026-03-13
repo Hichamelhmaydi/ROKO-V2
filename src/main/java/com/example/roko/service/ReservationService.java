@@ -34,6 +34,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final ActiviteRepository activiteRepository;
     private final ReservationMapper reservationMapper;
+    private final NotificationService notificationService;
 
     public ReservationDTO createReservation(ReservationDTO reservationDTO, Long userId) {
         log.info("Création d'une réservation pour l'utilisateur {} et le voyage {}",
@@ -41,12 +42,19 @@ public class ReservationService {
 
         Voyageurs voyageur = (Voyageurs) userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Utilisateur non trouvé avec l'ID: " + userId));
+                "Utilisateur non trouvé avec l'ID: " + userId));
 
+        if (Boolean.TRUE.equals(voyageur.getBloque())) {
+            throw new BusinessException("Votre compte est bloqué. Réservation impossible.");
+        }
+
+        if (!Boolean.TRUE.equals(voyageur.getActif())) {
+            throw new BusinessException("Votre compte est inactif. Réservation impossible.");
+        }
 
         Voyages voyage = voyageRepository.findById(reservationDTO.getVoyageId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Voyage non trouvé avec l'ID: " + reservationDTO.getVoyageId()));
+                "Voyage non trouvé avec l'ID: " + reservationDTO.getVoyageId()));
 
         if (!"DISPONIBLE".equals(voyage.getStatut().toString())) {
             throw new BusinessException("Ce voyage n'est plus disponible pour la réservation");
@@ -61,19 +69,18 @@ public class ReservationService {
         reservation.setDateReservation(LocalDateTime.now());
         reservation.setPaiementEffectue(false);
 
-
         BigDecimal prixBase = BigDecimal.valueOf(2000.00);
         reservation.setPrixBase(prixBase);
 
         BigDecimal prixActivites = BigDecimal.ZERO;
-        if (reservationDTO.getActivitesOptionnellesIds() != null &&
-                !reservationDTO.getActivitesOptionnellesIds().isEmpty()) {
+        if (reservationDTO.getActivitesOptionnellesIds() != null
+                && !reservationDTO.getActivitesOptionnellesIds().isEmpty()) {
 
             Set<Activites> activitesSelectionnees = new HashSet<>();
             for (Long activiteId : reservationDTO.getActivitesOptionnellesIds()) {
                 Activites activite = activiteRepository.findById(activiteId)
                         .orElseThrow(() -> new ResourceNotFoundException(
-                                "Activité non trouvée avec l'ID: " + activiteId));
+                        "Activité non trouvée avec l'ID: " + activiteId));
 
                 boolean appartientAuVoyage = activite.getActivitesVoyages().stream()
                         .anyMatch(av -> av.getVoyage().getId().equals(voyage.getId()));
@@ -91,13 +98,13 @@ public class ReservationService {
 
         reservation.setPrixActivites(prixActivites);
 
-
         Reservations savedReservation = reservationRepository.save(reservation);
         log.info("Réservation créée avec succès. ID: {}", savedReservation.getId());
 
+        notificationService.envoyerNotificationReservationCreee(userId, savedReservation.getId());
+
         return reservationMapper.toDTO(savedReservation);
     }
-
 
     @Transactional(readOnly = true)
     public Page<ReservationDTO> getAllReservations(Pageable pageable) {
@@ -106,14 +113,13 @@ public class ReservationService {
         return reservations.map(reservationMapper::toDTO);
     }
 
-
     @Transactional(readOnly = true)
     public ReservationDTO getReservationById(Long id, Long userId, boolean isAdmin) {
         log.info("Récupération de la réservation ID: {}", id);
 
         Reservations reservation = reservationRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Réservation non trouvée avec l'ID: " + id));
+                "Réservation non trouvée avec l'ID: " + id));
 
         if (!isAdmin && !reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas accès à cette réservation");
@@ -129,7 +135,6 @@ public class ReservationService {
         return reservationMapper.toDTOList(reservations);
     }
 
-
     @Transactional(readOnly = true)
     public List<ReservationDTO> getReservationsByVoyage(Long voyageId) {
         log.info("Récupération des réservations du voyage {}", voyageId);
@@ -142,7 +147,6 @@ public class ReservationService {
         return reservationMapper.toDTOList(reservations);
     }
 
-
     @Transactional(readOnly = true)
     public List<ReservationDTO> getReservationsByStatut(ReservationStatut statut) {
         log.info("Récupération des réservations avec le statut {}", statut);
@@ -150,16 +154,15 @@ public class ReservationService {
         return reservationMapper.toDTOList(reservations);
     }
 
-
     public ReservationDTO confirmerReservation(Long id) {
         log.info("Confirmation de la réservation ID: {}", id);
 
         Reservations reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Réservation non trouvée avec l'ID: " + id));
+                "Réservation non trouvée avec l'ID: " + id));
 
-        if (reservation.getStatut() != ReservationStatut.EN_ATTENTE &&
-                reservation.getStatut() != ReservationStatut.EN_ATTENTE_PAIEMENT) {
+        if (reservation.getStatut() != ReservationStatut.EN_ATTENTE
+                && reservation.getStatut() != ReservationStatut.EN_ATTENTE_PAIEMENT) {
             throw new BusinessException(
                     "Seules les réservations en attente peuvent être confirmées");
         }
@@ -178,7 +181,7 @@ public class ReservationService {
 
         Reservations reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Réservation non trouvée avec l'ID: " + id));
+                "Réservation non trouvée avec l'ID: " + id));
 
         if (!isAdmin && !reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas le droit d'annuler cette réservation");
@@ -199,16 +202,17 @@ public class ReservationService {
         Reservations updatedReservation = reservationRepository.save(reservation);
         log.info("Réservation annulée avec succès. ID: {}", id);
 
+        notificationService.envoyerNotificationReservationAnnulee(reservation.getVoyageur().getId(), id);
+
         return reservationMapper.toDTO(updatedReservation);
     }
-
 
     public ReservationDTO completerReservation(Long id) {
         log.info("Complétion de la réservation ID: {}", id);
 
         Reservations reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Réservation non trouvée avec l'ID: " + id));
+                "Réservation non trouvée avec l'ID: " + id));
 
         if (reservation.getStatut() != ReservationStatut.CONFIRMEE) {
             throw new BusinessException(
@@ -229,7 +233,7 @@ public class ReservationService {
 
         Reservations reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Réservation non trouvée avec l'ID: " + id));
+                "Réservation non trouvée avec l'ID: " + id));
 
         if (!isAdmin && !reservation.getVoyageur().getId().equals(userId)) {
             throw new BusinessException("Vous n'avez pas le droit de modifier cette réservation");
@@ -248,7 +252,6 @@ public class ReservationService {
         return reservationMapper.toDTO(updatedReservation);
     }
 
-
     public void deleteReservation(Long id) {
         log.info("Suppression de la réservation ID: {}", id);
 
@@ -260,18 +263,15 @@ public class ReservationService {
         log.info("Réservation supprimée avec succès. ID: {}", id);
     }
 
-
     @Transactional(readOnly = true)
     public long countReservationsByStatut(ReservationStatut statut) {
         return reservationRepository.countByStatut(statut);
     }
 
-
     @Transactional(readOnly = true)
     public long countReservationsByUser(Long userId) {
         return reservationRepository.countByUserId(userId);
     }
-
 
     @Transactional(readOnly = true)
     public List<ReservationDTO> getRecentReservations() {
@@ -280,13 +280,12 @@ public class ReservationService {
         return reservationMapper.toDTOList(reservations);
     }
 
-
     public ReservationDTO marquerCommePaye(Long id) {
         log.info("Marquage de la réservation ID: {} comme payée", id);
 
         Reservations reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Réservation non trouvée avec l'ID: " + id));
+                "Réservation non trouvée avec l'ID: " + id));
 
         reservation.setPaiementEffectue(true);
         reservation.setDatePaiement(LocalDateTime.now());

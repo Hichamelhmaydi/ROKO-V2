@@ -40,8 +40,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
+        AuthenticationManagerBuilder authenticationManagerBuilder
+                = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder
                 .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder());
@@ -54,28 +54,28 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/voyages/**").permitAll()
-                        .requestMatchers("/api/activites/**").permitAll()
-
-                        // Admin only endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
-
-                        // Authenticated endpoints
-                        .requestMatchers("/api/voyageurs/**").hasAnyRole("VOYAGEUR", "ADMIN")
-                        .requestMatchers("/api/reservations/**").authenticated()
-                        .requestMatchers("/api/payments/**").authenticated()
-
-                        // All other requests
-                        .anyRequest().authenticated()
+                // Public endpoints
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/voyages/**").permitAll()
+                .requestMatchers("/api/activites/**").permitAll()
+                .requestMatchers("/api/avis/voyage/**").permitAll()
+                // Admin only endpoints
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                // Authenticated endpoints
+                .requestMatchers("/api/voyageurs/**").hasAnyRole("VOYAGEUR", "ADMIN")
+                .requestMatchers("/api/reservations/**").authenticated()
+                .requestMatchers("/api/paiements/**").authenticated()
+                .requestMatchers("/api/notifications/**").authenticated()
+                .requestMatchers("/api/avis/**").authenticated()
+                // All other requests
+                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -27,4 +27,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE TYPE(u) = :type")
     List<User> findByUserType(@Param("type") Class<? extends User> type);
+
+    @Query(value = "SELECT COUNT(*) FROM users u WHERE "
+            + "(:userType IS NULL OR u.user_type = :userType) AND "
+            + "(:status IS NULL OR u.status = :status) AND "
+            + "(:bloque IS NULL OR u.bloque = :bloque)", nativeQuery = true)
+    long countByUserTypeAndStatus(
+            @Param("userType") String userType,
+            @Param("status") CompteStatus status,
+            @Param("bloque") Boolean bloque);
 }
