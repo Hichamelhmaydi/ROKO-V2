@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import  java.util.List;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-
 
 @Entity
 @Table(name = "voyages")
@@ -47,18 +47,19 @@ public class Voyages {
     @Column(length = 1000)
     private String itineraire;
 
+    @Column(name = "prix_base", precision = 10, scale = 2, nullable = false)
+    private BigDecimal prixBase = BigDecimal.ZERO;
+
     @ElementCollection
     @CollectionTable(name = "voyage_photos", joinColumns = @JoinColumn(name = "voyage_id"))
     @Column(name = "photo_url")
     private List<String> photos = new ArrayList<>();
-
 
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Activites_Voyages> activitesVoyages = new HashSet<>();
 
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL)
     private Set<Reservations> reservations = new HashSet<>();
-
 
     public void addActivite(Activites activite, Boolean obligatoire, Integer ordre) {
         Activites_Voyages activiteVoyage = new Activites_Voyages();
@@ -72,13 +73,11 @@ public class Voyages {
         activite.getActivitesVoyages().add(activiteVoyage);
     }
 
-
     public void removeActivite(Activites activite) {
-        activitesVoyages.removeIf(av ->
-                av.getVoyage().equals(this) && av.getActivite().equals(activite));
-        activite.getActivitesVoyages().removeIf(av ->
-                av.getVoyage().equals(this) && av.getActivite().equals(activite));
+        activitesVoyages.removeIf(av
+                -> av.getVoyage().equals(this) && av.getActivite().equals(activite));
+        activite.getActivitesVoyages().removeIf(av
+                -> av.getVoyage().equals(this) && av.getActivite().equals(activite));
     }
-
 
 }

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,9 +41,15 @@ public class ReservationService {
         log.info("Création d'une réservation pour l'utilisateur {} et le voyage {}",
                 userId, reservationDTO.getVoyageId());
 
-        Voyageurs voyageur = (Voyageurs) userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "Utilisateur non trouvé avec l'ID: " + userId));
+
+        if (!(user instanceof Voyageurs)) {
+            throw new BusinessException("Seul un voyageur peut créer une réservation.");
+        }
+
+        Voyageurs voyageur = (Voyageurs) user;
 
         if (Boolean.TRUE.equals(voyageur.getBloque())) {
             throw new BusinessException("Votre compte est bloqué. Réservation impossible.");
@@ -68,34 +75,21 @@ public class ReservationService {
         reservation.setStatut(ReservationStatut.EN_ATTENTE);
         reservation.setDateReservation(LocalDateTime.now());
         reservation.setPaiementEffectue(false);
+        reservation.setDatePaiement(null);
+        reservation.setDateConfirmation(null);
+        reservation.setDateAnnulation(null);
+        reservation.setDateCompletion(null);
+        reservation.setMotifAnnulation(null);
 
-        BigDecimal prixBase = BigDecimal.valueOf(2000.00);
+        BigDecimal prixBase = voyage.getPrixBase() != null ? voyage.getPrixBase() : BigDecimal.ZERO;
         reservation.setPrixBase(prixBase);
 
-        BigDecimal prixActivites = BigDecimal.ZERO;
-        if (reservationDTO.getActivitesOptionnellesIds() != null
-                && !reservationDTO.getActivitesOptionnellesIds().isEmpty()) {
+        Set<Activites> activitesSelectionnees = resolveAndValidateActivities(
+                reservationDTO.getActivitesOptionnellesIds(), voyage);
+        reservation.setActivites(activitesSelectionnees);
 
-            Set<Activites> activitesSelectionnees = new HashSet<>();
-            for (Long activiteId : reservationDTO.getActivitesOptionnellesIds()) {
-                Activites activite = activiteRepository.findById(activiteId)
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                        "Activité non trouvée avec l'ID: " + activiteId));
-
-                boolean appartientAuVoyage = activite.getActivitesVoyages().stream()
-                        .anyMatch(av -> av.getVoyage().getId().equals(voyage.getId()));
-
-                if (!appartientAuVoyage) {
-                    throw new BusinessException(
-                            "L'activité " + activite.getNom() + " n'appartient pas à ce voyage");
-                }
-
-                activitesSelectionnees.add(activite);
-                prixActivites = prixActivites.add(BigDecimal.valueOf(100.00)); // Prix fictif
-            }
-            reservation.setActivites(activitesSelectionnees);
-        }
-
+        BigDecimal prixActivites = calculateActivitiesTotal(
+                activitesSelectionnees, voyage, reservation.getNombrePersonnes());
         reservation.setPrixActivites(prixActivites);
 
         Reservations savedReservation = reservationRepository.save(reservation);
@@ -246,6 +240,23 @@ public class ReservationService {
 
         reservationMapper.updateEntityFromDTO(reservationDTO, reservation);
 
+        if (reservationDTO.getActivitesOptionnellesIds() != null) {
+            Set<Activites> activitesSelectionnees = resolveAndValidateActivities(
+                    reservationDTO.getActivitesOptionnellesIds(), reservation.getVoyage());
+            reservation.setActivites(activitesSelectionnees);
+        }
+
+        BigDecimal prixBase = reservation.getVoyage().getPrixBase() != null
+                ? reservation.getVoyage().getPrixBase()
+                : BigDecimal.ZERO;
+        reservation.setPrixBase(prixBase);
+
+        BigDecimal prixActivites = calculateActivitiesTotal(
+                reservation.getActivites() != null ? reservation.getActivites() : Collections.emptySet(),
+                reservation.getVoyage(),
+                reservation.getNombrePersonnes());
+        reservation.setPrixActivites(prixActivites);
+
         Reservations updatedReservation = reservationRepository.save(reservation);
         log.info("Réservation mise à jour avec succès. ID: {}", id);
 
@@ -295,5 +306,67 @@ public class ReservationService {
         log.info("Réservation marquée comme payée. ID: {}", id);
 
         return reservationMapper.toDTO(updatedReservation);
+    }
+
+    private Set<Activites> resolveAndValidateActivities(List<Long> activitesIds, Voyages voyage) {
+        if (activitesIds == null || activitesIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        Set<Activites> activitesSelectionnees = new HashSet<>();
+        for (Long activiteId : activitesIds) {
+            Activites activite = activiteRepository.findById(activiteId)
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                    "Activité non trouvée avec l'ID: " + activiteId));
+
+            boolean appartientAuVoyage = activite.getVoyage() != null
+                    && activite.getVoyage().getId().equals(voyage.getId());
+
+            if (!appartientAuVoyage) {
+                appartientAuVoyage = activite.getActivitesVoyages().stream()
+                        .anyMatch(av -> av.getVoyage().getId().equals(voyage.getId()));
+            }
+
+            if (!appartientAuVoyage) {
+                throw new BusinessException(
+                        "L'activité " + activite.getNom() + " n'appartient pas à ce voyage");
+            }
+
+            activitesSelectionnees.add(activite);
+        }
+
+        return activitesSelectionnees;
+    }
+
+    private BigDecimal calculateActivitiesTotal(Set<Activites> activites, Voyages voyage, Integer nombrePersonnes) {
+        if (activites == null || activites.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal totalUnitaire = activites.stream()
+                .map(activite -> resolveActivityPrice(activite, voyage))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int quantite = (nombrePersonnes == null || nombrePersonnes < 1) ? 1 : nombrePersonnes;
+        return totalUnitaire.multiply(BigDecimal.valueOf(quantite));
+    }
+
+    private BigDecimal resolveActivityPrice(Activites activite, Voyages voyage) {
+        BigDecimal prixAssociation = activite.getActivitesVoyages().stream()
+                .filter(av -> av.getVoyage().getId().equals(voyage.getId()))
+                .map(Activites_Voyages::getPrix)
+                .filter(prix -> prix != null && prix.compareTo(BigDecimal.ZERO) >= 0)
+                .findFirst()
+                .orElse(null);
+
+        if (prixAssociation != null) {
+            return prixAssociation;
+        }
+
+        if (activite.getPrix() != null && activite.getPrix().compareTo(BigDecimal.ZERO) >= 0) {
+            return activite.getPrix();
+        }
+
+        return BigDecimal.ZERO;
     }
 }

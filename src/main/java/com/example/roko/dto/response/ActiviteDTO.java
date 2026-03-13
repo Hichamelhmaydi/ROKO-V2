@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +23,9 @@ public class ActiviteDTO {
     @NotBlank(message = "La description de l'activité est obligatoire")
     @Size(min = 10, max = 1000, message = "La description doit contenir entre 10 et 1000 caractères")
     private String description;
+
+    @NotNull(message = "Le prix de l'activité est obligatoire")
+    private BigDecimal prix;
 
     @NotNull(message = "L'ID du voyage est obligatoire")
     private Long voyageId;

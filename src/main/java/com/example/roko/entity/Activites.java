@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,6 +25,9 @@ public class Activites {
 
     @Column(length = 1000)
     private String description;
+
+    @Column(precision = 10, scale = 2, nullable = false)
+    private BigDecimal prix = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Activites_Voyages> activitesVoyages = new HashSet<>();

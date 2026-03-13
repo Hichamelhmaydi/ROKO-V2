@@ -13,17 +13,29 @@ import java.util.stream.Collectors;
 public class ActiviteMapper {
 
     public ActiviteDTO toDTO(Activites activite) {
-        if (activite == null) return null;
+        if (activite == null) {
+            return null;
+        }
 
         ActiviteDTO dto = new ActiviteDTO();
         dto.setId(activite.getId());
         dto.setNom(activite.getNom());
         dto.setDescription(activite.getDescription());
+        dto.setPrix(activite.getPrix());
+
+        if (activite.getVoyage() != null) {
+            dto.setVoyageId(activite.getVoyage().getId());
+            dto.setVoyageNom(activite.getVoyage().getNom());
+        }
 
         if (activite.getActivitesVoyages() != null && !activite.getActivitesVoyages().isEmpty()) {
             Activites_Voyages av = activite.getActivitesVoyages().iterator().next();
-            dto.setVoyageId(av.getVoyage().getId());
-            dto.setVoyageNom(av.getVoyage().getDestination());
+            if (dto.getVoyageId() == null) {
+                dto.setVoyageId(av.getVoyage().getId());
+            }
+            if (dto.getVoyageNom() == null) {
+                dto.setVoyageNom(av.getVoyage().getNom());
+            }
         }
 
         if (activite.getReservations() != null) {
@@ -34,30 +46,46 @@ public class ActiviteMapper {
     }
 
     public Activites toEntity(ActiviteDTO dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            return null;
+        }
 
         Activites activite = new Activites();
         activite.setId(dto.getId());
         activite.setNom(dto.getNom());
         activite.setDescription(dto.getDescription());
+        activite.setPrix(dto.getPrix());
 
         return activite;
     }
 
     public List<ActiviteDTO> toDTOList(List<Activites> activites) {
-        if (activites == null) return new ArrayList<>();
+        if (activites == null) {
+            return new ArrayList<>();
+        }
         return activites.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     public List<Activites> toEntityList(List<ActiviteDTO> dtos) {
-        if (dtos == null) return new ArrayList<>();
+        if (dtos == null) {
+            return new ArrayList<>();
+        }
         return dtos.stream().map(this::toEntity).collect(Collectors.toList());
     }
 
     public void updateEntityFromDTO(ActiviteDTO dto, Activites activite) {
-        if (dto == null || activite == null) return;
+        if (dto == null || activite == null) {
+            return;
+        }
 
-        if (dto.getNom() != null) activite.setNom(dto.getNom());
-        if (dto.getDescription() != null) activite.setDescription(dto.getDescription());
+        if (dto.getNom() != null) {
+            activite.setNom(dto.getNom());
+        }
+        if (dto.getDescription() != null) {
+            activite.setDescription(dto.getDescription());
+        }
+        if (dto.getPrix() != null) {
+            activite.setPrix(dto.getPrix());
+        }
     }
 }

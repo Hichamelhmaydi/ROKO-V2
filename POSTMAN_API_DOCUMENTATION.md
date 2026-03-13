@@ -55,30 +55,38 @@ Accept: application/json
 
 - `/api/auth/login`
 - `/api/auth/register`
-- `/api/voyages/**`
-- `/api/activites/**`
+- `GET /api/voyages/**`
+- `GET /api/activites/**`
+- `GET /api/activites-voyages/**`
+- `POST /api/paiements/webhook`
 
 ### Admin seulement
 
 - `/api/users/**`
 - `/api/admin/**`
 - `/api/admin/dashboard` (statistiques tableau de bord)
+- `POST|PUT|PATCH|DELETE /api/voyages/**`
+- `POST|PUT|PATCH|DELETE /api/activites/**`
+- `POST|PUT|DELETE /api/activites-voyages/**`
 - plusieurs endpoints réservations et paiements avec `@PreAuthorize("hasRole('ADMIN')")`
 - `/api/voyageurs/{id}/block` et `/api/voyageurs/{id}/unblock`
 - `/api/reservations/user/{userId}`
 
 ### Authentifié
 
+- `/api/auth/me`
+- `/api/auth/logout`
 - `/api/voyageurs/**`
 - `/api/reservations/**`
-- `/api/activites-voyages/**`
 - `/api/paiements/**`
 - `/api/notifications/**`
 
 ### Important
 
-- `/api/auth/me` et `/api/auth/logout` sont sous `/api/auth/**`, mais `me` a quand même besoin d'un JWT valide pour renvoyer l'utilisateur courant.
-- `/api/paiements/webhook` est aujourd'hui protégé par la sécurité globale du projet, donc il demandera aussi une authentification tant que la config n'est pas ajustée.
+- `GET` sur voyages, activités et associations activité-voyage est accessible à l'utilisateur invité, c'est-à-dire sans authentification.
+- Toutes les actions d'écriture sur voyages et activités sont réservées à l'administrateur, conformément au cahier de charge.
+- `/api/auth/me` et `/api/auth/logout` exigent maintenant un JWT valide.
+- `/api/paiements/webhook` est public, même si son traitement métier reste un stub.
 - `/api/auth/logout` ne détruit pas le token côté serveur. Le backend est stateless JWT.
 
 ## Enums acceptées
@@ -139,15 +147,16 @@ GENERAL
 1. Créer un voyageur avec `/api/auth/register`.
 2. Se connecter avec `/api/auth/login`.
 3. Récupérer le profil avec `/api/auth/me`.
-4. Créer un voyage avec `/api/voyages`.
-5. Créer une activité avec `/api/activites`.
-6. Associer activité et voyage avec `/api/activites-voyages`.
-7. Créer une réservation avec `/api/reservations`.
-8. Créer une session Stripe avec `/api/paiements/create-session`.
-9. Confirmer ou simuler l'échec de paiement.
-10. Consulter les notifications reçues avec `/api/notifications/me`.
-11. Consulter le tableau de bord admin avec `/api/admin/dashboard`.
-12. Tester le blocage d'un voyageur avec `PATCH /api/voyageurs/{id}/block`.
+4. Se connecter avec un compte admin.
+5. Créer un voyage avec `/api/voyages`.
+6. Créer une activité avec `/api/activites`.
+7. Associer activité et voyage avec `/api/activites-voyages`.
+8. Revenir sur le compte voyageur et créer une réservation avec `/api/reservations`.
+9. Créer une session Stripe avec `/api/paiements/create-session`.
+10. Confirmer ou simuler l'échec de paiement.
+11. Consulter les notifications reçues avec `/api/notifications/me`.
+12. Consulter le tableau de bord admin avec `/api/admin/dashboard`.
+13. Tester le blocage d'un voyageur avec `PATCH /api/voyageurs/{id}/block`.
 
 ## 1. Authentification
 
@@ -248,7 +257,7 @@ Pas de body.
 
 Déconnexion logique seulement.
 
-Auth: optionnel dans le code, mais recommandé si tu simules un vrai flux utilisateur.
+Auth: `Bearer {{TOKEN_VOYAGEUR}}` ou `Bearer {{TOKEN_ADMIN}}`
 
 Pas de body.
 
@@ -276,6 +285,7 @@ Réponse:
   "dateRetour": "2026-06-20",
   "statut": "DISPONIBLE",
   "itineraire": "Marrakech -> Ouarzazate -> Merzouga",
+  "prixBase": 1800.0,
   "photos": ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"]
 }
 ```
@@ -284,7 +294,7 @@ Réponse:
 
 Crée un voyage.
 
-Auth: public dans la config actuelle.
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 Body exemple:
 
@@ -298,6 +308,7 @@ Body exemple:
   "dateRetour": "2026-06-20",
   "statut": "DISPONIBLE",
   "itineraire": "Marrakech -> Ouarzazate -> Merzouga",
+  "prixBase": 1800.0,
   "photos": []
 }
 ```
@@ -342,17 +353,21 @@ Recherche par date de départ.
 
 Met à jour un voyage.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 Body: même structure que `VoyageDTO`.
 
 ### `PATCH {{BASE_URL}}/api/voyages/{{VOYAGE_ID}}/statut?statut=COMPLET`
 
 Met à jour uniquement le statut.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `POST {{BASE_URL}}/api/voyages/{{VOYAGE_ID}}/photos`
 
 Ajoute une photo.
 
-Auth: public dans la config actuelle.
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 Body brut attendu: une chaîne JSON.
 
@@ -366,6 +381,8 @@ Exemple body raw JSON:
 
 Supprime une photo.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 Body brut:
 
 ```json
@@ -376,17 +393,25 @@ Body brut:
 
 Supprime un voyage.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `GET {{BASE_URL}}/api/voyages/stats/disponibles`
 
 Compte des voyages disponibles.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ### `GET {{BASE_URL}}/api/voyages/stats/total`
 
 Compte total des voyages.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `GET {{BASE_URL}}/api/voyages/stats/statut/ANNULE`
 
 Compte par statut.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ## 3. Activités
 
@@ -397,6 +422,7 @@ Compte par statut.
   "id": 1,
   "nom": "Balade en dromadaire",
   "description": "Balade guidée de deux heures dans les dunes",
+  "prix": 250.0,
   "voyageId": 1,
   "voyageNom": "Circuit Désert",
   "nombreReservations": 0
@@ -405,7 +431,7 @@ Compte par statut.
 
 ### `POST {{BASE_URL}}/api/activites`
 
-Auth: public dans la config actuelle.
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 Body:
 
@@ -413,6 +439,7 @@ Body:
 {
   "nom": "Balade en dromadaire",
   "description": "Balade guidée de deux heures dans les dunes",
+  "prix": 250.00,
   "voyageId": {{VOYAGE_ID}}
 }
 ```
@@ -429,6 +456,8 @@ Détail activité.
 
 Détail avec réservations liées.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `GET {{BASE_URL}}/api/activites/voyage/{{VOYAGE_ID}}`
 
 Activités d'un voyage.
@@ -436,6 +465,8 @@ Activités d'un voyage.
 ### `GET {{BASE_URL}}/api/activites/voyage/{{VOYAGE_ID}}/details`
 
 Activités d'un voyage avec détails.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ### `GET {{BASE_URL}}/api/activites/search?nom=dromadaire`
 
@@ -451,15 +482,21 @@ Liste activités populaires.
 
 ### `PUT {{BASE_URL}}/api/activites/{{ACTIVITE_ID}}`
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 Body: même structure que `ActiviteDTO`.
 
 ### `DELETE {{BASE_URL}}/api/activites/{{ACTIVITE_ID}}`
 
 Suppression normale.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `DELETE {{BASE_URL}}/api/activites/{{ACTIVITE_ID}}/force`
 
 Suppression forcée.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ### `GET {{BASE_URL}}/api/activites/voyage/{{VOYAGE_ID}}/count`
 
@@ -473,7 +510,8 @@ Vérifie l'existence.
 
 ### Important
 
-Ces routes sont sous `/api/activites-voyages` et demandent actuellement un JWT valide.
+Les lectures (`GET`) sont publiques.
+Les écritures (`POST`, `PUT`, `DELETE`) sont réservées à l'admin.
 
 ### DTO `ActiviteVoyageDTO`
 
@@ -498,7 +536,7 @@ Ces routes sont sous `/api/activites-voyages` et demandent actuellement un JWT v
 
 ### `POST {{BASE_URL}}/api/activites-voyages`
 
-Auth: `Bearer {{TOKEN_VOYAGEUR}}` ou `Bearer {{TOKEN_ADMIN}}`
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 Body:
 
@@ -538,15 +576,21 @@ Liste par jour prévu.
 
 ### `PUT {{BASE_URL}}/api/activites-voyages/{{ACTIVITE_VOYAGE_ID}}`
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 Body: même structure que `ActiviteVoyageDTO`.
 
 ### `DELETE {{BASE_URL}}/api/activites-voyages/activite/{{ACTIVITE_ID}}/voyage/{{VOYAGE_ID}}`
 
 Dissocie activité et voyage.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `DELETE {{BASE_URL}}/api/activites-voyages/{{ACTIVITE_VOYAGE_ID}}`
 
 Supprime l'association par id.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ### `GET {{BASE_URL}}/api/activites-voyages/voyage/{{VOYAGE_ID}}/count`
 
@@ -565,6 +609,13 @@ Pour créer, les champs minimums sont surtout:
   "commentaire": "Nous arriverons tard",
   "activitesOptionnellesIds": [1]
 }
+
+Le backend calcule automatiquement:
+
+- `prixBase` depuis `voyages.prixBase`
+- `prixActivites` depuis les activités sélectionnées par le voyageur
+- `montantTotal = (prixBase * nombrePersonnes) + prixActivites`
+- la réponse n'est pas un simple echo du body: elle contient l'ID créé, le statut, les montants calculés et les détails utilisateur/voyage.
 ```
 
 Réponse plus complète possible:
@@ -584,9 +635,9 @@ Réponse plus complète possible:
   "nombrePersonnes": 2,
   "statut": "EN_ATTENTE",
   "dateReservation": "2026-03-12T16:00:00",
-  "prixBase": 1000,
-  "prixActivites": 250,
-  "montantTotal": 2250,
+  "prixBase": 1800.0,
+  "prixActivites": 500.0,
+  "montantTotal": 4100.0,
   "commentaire": "Nous arriverons tard",
   "activitesOptionnellesIds": [1],
   "motifAnnulation": null,
@@ -714,7 +765,7 @@ Auth: admin.
 ### Important
 
 - Le contrôleur est exposé sous `/api/paiements`.
-- Tous les endpoints demandent en pratique un JWT valide à cause de la config de sécurité actuelle.
+- Tous les endpoints demandent un JWT valide sauf `/api/paiements/webhook`.
 - Les webhooks Stripe ne sont pas encore traités fonctionnellement: la route renvoie juste `Webhook reçu`.
 
 ### DTO `PaymentDTO`
@@ -755,7 +806,7 @@ Réponse typique:
 
 ### `POST {{BASE_URL}}/api/paiements/confirm`
 
-Auth: actuellement JWT nécessaire.
+Auth: `Bearer {{TOKEN_VOYAGEUR}}` ou `Bearer {{TOKEN_ADMIN}}`
 
 Body:
 
@@ -767,7 +818,7 @@ Body:
 
 ### `POST {{BASE_URL}}/api/paiements/failure`
 
-Auth: actuellement JWT nécessaire.
+Auth: `Bearer {{TOKEN_VOYAGEUR}}` ou `Bearer {{TOKEN_ADMIN}}`
 
 Body:
 
@@ -780,7 +831,7 @@ Body:
 
 ### `POST {{BASE_URL}}/api/paiements/webhook`
 
-Auth: actuellement JWT nécessaire.
+Auth: non
 
 Headers:
 
@@ -876,7 +927,7 @@ Format requis pour `debut` et `fin`: ISO `yyyy-MM-ddTHH:mm:ss`
 
 ### `POST {{BASE_URL}}/api/voyageurs`
 
-Auth: JWT requis.
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 Body:
 
@@ -896,23 +947,35 @@ Body:
 
 Liste des voyageurs.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `GET {{BASE_URL}}/api/voyageurs/{{VOYAGEUR_ID}}`
 
 Détail voyageur.
+
+Auth: `Bearer {{TOKEN_ADMIN}}` ou propriétaire si `VOYAGEUR_ID` correspond à l'utilisateur connecté.
 
 ### `GET {{BASE_URL}}/api/voyageurs/email/ali@example.com`
 
 Recherche par email.
 
+Auth: `Bearer {{TOKEN_ADMIN}}` ou propriétaire si l'email correspond à l'utilisateur connecté.
+
 ### `GET {{BASE_URL}}/api/voyageurs/status/ACTIVER`
 
 Filtre par statut.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ### `GET {{BASE_URL}}/api/voyageurs/search?query=Ali`
 
 Recherche texte.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `PUT {{BASE_URL}}/api/voyageurs/{{VOYAGEUR_ID}}`
+
+Auth: `Bearer {{TOKEN_ADMIN}}` ou propriétaire si `VOYAGEUR_ID` correspond à l'utilisateur connecté.
 
 Body: même structure que `VoyageurDTO`.
 
@@ -920,17 +983,25 @@ Body: même structure que `VoyageurDTO`.
 
 Bascule le statut.
 
+Auth: `Bearer {{TOKEN_ADMIN}}` ou propriétaire si `VOYAGEUR_ID` correspond à l'utilisateur connecté.
+
 ### `DELETE {{BASE_URL}}/api/voyageurs/{{VOYAGEUR_ID}}`
 
 Supprime un voyageur.
+
+Auth: `Bearer {{TOKEN_ADMIN}}` ou propriétaire si `VOYAGEUR_ID` correspond à l'utilisateur connecté.
 
 ### `GET {{BASE_URL}}/api/voyageurs/stats/active`
 
 Compte des voyageurs actifs.
 
+Auth: `Bearer {{TOKEN_ADMIN}}`
+
 ### `GET {{BASE_URL}}/api/voyageurs/stats/total`
 
 Compte total des voyageurs.
+
+Auth: `Bearer {{TOKEN_ADMIN}}`
 
 ### `PATCH {{BASE_URL}}/api/voyageurs/{{VOYAGEUR_ID}}/block`
 
@@ -1070,7 +1141,6 @@ Compte total des utilisateurs.
 ### `GET {{BASE_URL}}/api/users/stats/inactive`
 
 Compte des utilisateurs inactifs.
-
 
 ## 9. Notifications
 
@@ -1216,15 +1286,17 @@ if (data.length > 0) {
 2. `POST /api/auth/login`
 3. `GET /api/auth/me`
 4. `GET /api/voyages`
-5. `POST /api/reservations`
-6. `GET /api/notifications/me` — notification de création reçue
-7. `GET /api/notifications/me/unread-count`
-8. `PATCH /api/notifications/{id}/read`
-9. `GET /api/reservations/me`
-10. `POST /api/paiements/create-session`
-11. `POST /api/paiements/confirm`
-12. `GET /api/notifications/me` — notification de paiement reçue
-13. `GET /api/paiements/me`
+5. `GET /api/activites`
+6. `GET /api/activites-voyages/voyage/{voyageId}`
+7. `POST /api/reservations`
+8. `GET /api/notifications/me` — notification de création reçue
+9. `GET /api/notifications/me/unread-count`
+10. `PATCH /api/notifications/{id}/read`
+11. `GET /api/reservations/me`
+12. `POST /api/paiements/create-session`
+13. `POST /api/paiements/confirm`
+14. `GET /api/notifications/me` — notification de paiement reçue
+15. `GET /api/paiements/me`
 
 ### Flux admin complet
 
@@ -1244,11 +1316,13 @@ if (data.length > 0) {
 
 ## Notes de validation
 
-- Les routes `voyages` et `activites` sont ouvertes publiquement dans la version actuelle.
+- Les routes `voyages`, `activites` et `activites-voyages` sont publiques en lecture uniquement (`GET`).
+- Les créations, modifications et suppressions sur `voyages`, `activites` et `activites-voyages` exigent un token admin.
 - Les routes `paiements` utilisent le préfixe `/api/paiements` et non `/api/payments`.
 - Les dates des paiements par période doivent être passées en ISO date-time.
 - Les routes photo des voyages attendent un body brut de type chaîne JSON, pas un objet.
 - Le webhook Stripe est encore un stub de réception.
+- L'utilisateur invité correspond à la consultation sans authentification; les réservations, paiements et notifications exigent un compte connecté.
 - Un voyageur bloqué (`bloque: true`) ne peut plus se connecter (`isAccountNonLocked = false`) ni réserver.
 - Les notifications sont créées automatiquement à chaque événement métier (réservation, paiement, annulation) ; aucune action manuelle admin requise.
 - Le dashboard admin (`GET /api/admin/dashboard`) agrège les données en une seule requête sans paramètre.
