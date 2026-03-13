@@ -5,6 +5,7 @@ import com.example.roko.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -60,18 +61,27 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/voyages/**").permitAll()
-                .requestMatchers("/api/activites/**").permitAll()
+                // Public auth endpoints
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/api/paiements/webhook").permitAll()
+                // Auth endpoints requiring authentication
+                .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
+                .requestMatchers("/api/auth/register-admin").hasRole("ADMIN")
+                // Public read-only exploration for guests
+                .requestMatchers(HttpMethod.GET, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").permitAll()
+                // Admin-only write operations on voyages and activites
+                .requestMatchers(HttpMethod.POST, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
                 // Admin only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 // Authenticated endpoints
-                .requestMatchers("/api/voyageurs/**").hasAnyRole("VOYAGEUR", "ADMIN")
-                .requestMatchers("/api/reservations/**").authenticated()
-                .requestMatchers("/api/paiements/**").authenticated()
-                .requestMatchers("/api/notifications/**").authenticated()
+                .requestMatchers("/api/voyageurs/**").authenticated()
+                .requestMatchers("/api/reservations/**").hasAnyRole("VOYAGEUR", "ADMIN")
+                .requestMatchers("/api/paiements/**").hasAnyRole("VOYAGEUR", "ADMIN")
+                .requestMatchers("/api/notifications/**").hasAnyRole("VOYAGEUR", "ADMIN")
                 // All other requests
                 .anyRequest().authenticated()
                 )

@@ -59,6 +59,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getCurrentUser() {
         try {
             UserPrincipal currentUser = authService.getCurrentUser();
@@ -71,6 +72,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> logout() {
 
         return ResponseEntity.ok(new MessageResponseDTO(true, "Déconnexion réussie"));

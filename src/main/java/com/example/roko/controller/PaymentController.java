@@ -42,6 +42,7 @@ public class PaymentController {
     }
 
     @PostMapping("/confirm")
+    @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
     public ResponseEntity<PaymentDTO> confirmPayment(@RequestBody Map<String, String> request) {
         log.info("Requête POST /api/paiements/confirm");
 
@@ -51,8 +52,8 @@ public class PaymentController {
         return ResponseEntity.ok(payment);
     }
 
-
     @PostMapping("/failure")
+    @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
     public ResponseEntity<PaymentDTO> handlePaymentFailure(@RequestBody Map<String, String> request) {
         log.info("Requête POST /api/paiements/failure");
 
@@ -63,15 +64,12 @@ public class PaymentController {
         return ResponseEntity.ok(payment);
     }
 
-
     @PostMapping("/webhook")
     public ResponseEntity<String> handleStripeWebhook(
             @RequestBody String payload,
             @RequestHeader("Stripe-Signature") String sigHeader) {
 
         log.info("Webhook Stripe reçu");
-
-
 
         return ResponseEntity.ok("Webhook reçu");
     }
@@ -84,7 +82,6 @@ public class PaymentController {
         List<PaymentDTO> payments = paymentService.getAllPayments();
         return ResponseEntity.ok(payments);
     }
-
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
@@ -159,14 +156,13 @@ public class PaymentController {
 
         log.info("Requête POST /api/paiements/{}/rembourser", id);
 
-        Double amount = request.get("amount") != null ?
-                Double.valueOf(request.get("amount").toString()) : null;
+        Double amount = request.get("amount") != null
+                ? Double.valueOf(request.get("amount").toString()) : null;
         String reason = (String) request.get("reason");
 
         Map<String, Object> response = paymentService.createRefund(id, amount, reason);
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/statistiques/chiffre-affaires")
     @PreAuthorize("hasRole('ADMIN')")
@@ -180,7 +176,6 @@ public class PaymentController {
 
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/statistiques/chiffre-affaires/periode")
     @PreAuthorize("hasRole('ADMIN')")
@@ -199,7 +194,6 @@ public class PaymentController {
 
         return ResponseEntity.ok(response);
     }
-
 
     private Long getUserIdFromAuthentication(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserPrincipal) {

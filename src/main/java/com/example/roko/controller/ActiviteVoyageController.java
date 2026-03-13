@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 @RestController
 @RequestMapping("/api/activites-voyages")
@@ -23,15 +23,14 @@ public class ActiviteVoyageController {
 
     private final ActiviteVoyageService activiteVoyageService;
 
-
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteVoyageDTO> associerActiviteAVoyage(
             @Valid @RequestBody ActiviteVoyageDTO dto) {
         log.info("Requête POST /api/activites-voyages - Association activité-voyage");
         ActiviteVoyageDTO created = activiteVoyageService.associerActiviteAVoyage(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
-
 
     @GetMapping("/voyage/{voyageId}")
     public ResponseEntity<List<ActiviteVoyageDTO>> getActivitesByVoyage(
@@ -41,7 +40,6 @@ public class ActiviteVoyageController {
         return ResponseEntity.ok(activites);
     }
 
-
     @GetMapping("/activite/{activiteId}")
     public ResponseEntity<List<ActiviteVoyageDTO>> getVoyagesByActivite(
             @PathVariable Long activiteId) {
@@ -50,7 +48,6 @@ public class ActiviteVoyageController {
         return ResponseEntity.ok(voyages);
     }
 
-
     @GetMapping("/voyage/{voyageId}/obligatoires")
     public ResponseEntity<List<ActiviteVoyageDTO>> getActivitesObligatoires(
             @PathVariable Long voyageId) {
@@ -58,7 +55,6 @@ public class ActiviteVoyageController {
         List<ActiviteVoyageDTO> activites = activiteVoyageService.getActivitesObligatoires(voyageId);
         return ResponseEntity.ok(activites);
     }
-
 
     @GetMapping("/voyage/{voyageId}/optionnelles")
     public ResponseEntity<List<ActiviteVoyageDTO>> getActivitesOptionnelles(
@@ -77,8 +73,8 @@ public class ActiviteVoyageController {
         return ResponseEntity.ok(activites);
     }
 
-
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteVoyageDTO> updateAssociation(
             @PathVariable Long id,
             @Valid @RequestBody ActiviteVoyageDTO dto) {
@@ -87,8 +83,8 @@ public class ActiviteVoyageController {
         return ResponseEntity.ok(updated);
     }
 
-
     @DeleteMapping("/activite/{activiteId}/voyage/{voyageId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> dissocierActiviteDeVoyage(
             @PathVariable Long activiteId,
             @PathVariable Long voyageId) {
@@ -104,8 +100,8 @@ public class ActiviteVoyageController {
         return ResponseEntity.ok(response);
     }
 
-
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteAssociation(@PathVariable Long id) {
         log.info("Requête DELETE /api/activites-voyages/{}", id);
         activiteVoyageService.deleteAssociation(id);
@@ -116,7 +112,6 @@ public class ActiviteVoyageController {
 
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/voyage/{voyageId}/count")
     public ResponseEntity<Map<String, Object>> countActivites(@PathVariable Long voyageId) {

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -23,12 +24,12 @@ public class ActiviteController {
     private final ActiviteService activiteService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteDTO> createActivite(@Valid @RequestBody ActiviteDTO activiteDTO) {
         log.info("Requête POST /api/activites - Création d'une activité: {}", activiteDTO.getNom());
         ActiviteDTO createdActivite = activiteService.createActivite(activiteDTO);
         return new ResponseEntity<>(createdActivite, HttpStatus.CREATED);
     }
-
 
     @GetMapping
     public ResponseEntity<List<ActiviteDTO>> getAllActivites() {
@@ -37,7 +38,6 @@ public class ActiviteController {
         return ResponseEntity.ok(activites);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<ActiviteDTO> getActiviteById(@PathVariable Long id) {
         log.info("Requête GET /api/activites/{} - Récupération de l'activité", id);
@@ -45,14 +45,13 @@ public class ActiviteController {
         return ResponseEntity.ok(activite);
     }
 
-
     @GetMapping("/{id}/details")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteDTO> getActiviteByIdWithReservations(@PathVariable Long id) {
         log.info("Requête GET /api/activites/{}/details - Récupération avec réservations", id);
         ActiviteDTO activite = activiteService.getActiviteByIdWithReservations(id);
         return ResponseEntity.ok(activite);
     }
-
 
     @GetMapping("/voyage/{voyageId}")
     public ResponseEntity<List<ActiviteDTO>> getActivitesByVoyageId(@PathVariable Long voyageId) {
@@ -61,8 +60,8 @@ public class ActiviteController {
         return ResponseEntity.ok(activites);
     }
 
-
     @GetMapping("/voyage/{voyageId}/details")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ActiviteDTO>> getActivitesByVoyageIdWithReservations(@PathVariable Long voyageId) {
         log.info("Requête GET /api/activites/voyage/{}/details - Avec réservations", voyageId);
         List<ActiviteDTO> activites = activiteService.getActivitesByVoyageIdWithReservations(voyageId);
@@ -76,14 +75,12 @@ public class ActiviteController {
         return ResponseEntity.ok(activites);
     }
 
-
     @GetMapping("/search/description")
     public ResponseEntity<List<ActiviteDTO>> searchActivitesByDescription(@RequestParam String keyword) {
         log.info("Requête GET /api/activites/search/description?keyword={}", keyword);
         List<ActiviteDTO> activites = activiteService.searchActivitesByDescription(keyword);
         return ResponseEntity.ok(activites);
     }
-
 
     @GetMapping("/populaires")
     public ResponseEntity<List<ActiviteDTO>> getMostPopularActivites() {
@@ -93,6 +90,7 @@ public class ActiviteController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ActiviteDTO> updateActivite(
             @PathVariable Long id,
             @Valid @RequestBody ActiviteDTO activiteDTO) {
@@ -101,8 +99,8 @@ public class ActiviteController {
         return ResponseEntity.ok(updatedActivite);
     }
 
-
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteActivite(@PathVariable Long id) {
         log.info("Requête DELETE /api/activites/{} - Suppression de l'activité", id);
         activiteService.deleteActivite(id);
@@ -114,8 +112,8 @@ public class ActiviteController {
         return ResponseEntity.ok(response);
     }
 
-
     @DeleteMapping("/{id}/force")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, String>> forceDeleteActivite(@PathVariable Long id) {
         log.warn("Requête DELETE /api/activites/{}/force - Suppression forcée", id);
         activiteService.forceDeleteActivite(id);
@@ -128,7 +126,6 @@ public class ActiviteController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/voyage/{voyageId}/count")
     public ResponseEntity<Map<String, Long>> countActivitesByVoyageId(@PathVariable Long voyageId) {
         log.info("Requête GET /api/activites/voyage/{}/count", voyageId);
@@ -140,7 +137,6 @@ public class ActiviteController {
 
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/{id}/exists")
     public ResponseEntity<Map<String, Boolean>> activiteExists(@PathVariable Long id) {

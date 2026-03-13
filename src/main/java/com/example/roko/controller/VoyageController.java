@@ -6,6 +6,7 @@ import com.example.roko.service.VoyageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +19,8 @@ public class VoyageController {
 
     private final VoyageService voyageService;
 
-
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageDTO> createVoyage(@RequestBody VoyageDTO voyageDTO) {
         try {
             VoyageDTO createdVoyage = voyageService.createVoyage(voyageDTO);
@@ -29,13 +30,11 @@ public class VoyageController {
         }
     }
 
-
     @GetMapping
     public ResponseEntity<List<VoyageDTO>> getAllVoyages() {
         List<VoyageDTO> voyages = voyageService.getAllVoyages();
         return ResponseEntity.ok(voyages);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<VoyageDTO> getVoyageById(@PathVariable Long id) {
@@ -52,7 +51,6 @@ public class VoyageController {
         List<VoyageDTO> voyages = voyageService.getVoyagesDisponibles();
         return ResponseEntity.ok(voyages);
     }
-
 
     @GetMapping("/destination/{destination}")
     public ResponseEntity<List<VoyageDTO>> getVoyagesByDestination(@PathVariable String destination) {
@@ -71,13 +69,11 @@ public class VoyageController {
         }
     }
 
-
     @GetMapping("/search")
     public ResponseEntity<List<VoyageDTO>> searchVoyages(@RequestParam String query) {
         List<VoyageDTO> voyages = voyageService.searchVoyages(query);
         return ResponseEntity.ok(voyages);
     }
-
 
     @GetMapping("/nom/{nom}")
     public ResponseEntity<List<VoyageDTO>> getVoyagesByNom(@PathVariable String nom) {
@@ -98,7 +94,6 @@ public class VoyageController {
         }
     }
 
-
     @GetMapping("/date-depart/{dateDepart}")
     public ResponseEntity<List<VoyageDTO>> getVoyagesByDateDepart(@PathVariable String dateDepart) {
         List<VoyageDTO> voyages = voyageService.getVoyagesByDateDepart(dateDepart);
@@ -106,6 +101,7 @@ public class VoyageController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageDTO> updateVoyage(
             @PathVariable Long id,
             @RequestBody VoyageDTO voyageDTO) {
@@ -118,6 +114,7 @@ public class VoyageController {
     }
 
     @PatchMapping("/{id}/statut")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageDTO> updateVoyageStatut(
             @PathVariable Long id,
             @RequestParam String statut) {
@@ -133,6 +130,7 @@ public class VoyageController {
     }
 
     @PostMapping("/{id}/photos")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageDTO> addPhotoToVoyage(
             @PathVariable Long id,
             @RequestBody String photoUrl) {
@@ -145,6 +143,7 @@ public class VoyageController {
     }
 
     @DeleteMapping("/{id}/photos")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageDTO> removePhotoFromVoyage(
             @PathVariable Long id,
             @RequestBody String photoUrl) {
@@ -156,8 +155,8 @@ public class VoyageController {
         }
     }
 
-
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVoyage(@PathVariable Long id) {
         try {
             voyageService.deleteVoyage(id);
@@ -167,22 +166,22 @@ public class VoyageController {
         }
     }
 
-
     @GetMapping("/stats/disponibles")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> countVoyagesDisponibles() {
         long count = voyageService.countVoyagesDisponibles();
         return ResponseEntity.ok(count);
     }
 
-
     @GetMapping("/stats/total")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> countAllVoyages() {
         long count = voyageService.countAllVoyages();
         return ResponseEntity.ok(count);
     }
 
-
     @GetMapping("/stats/statut/{statut}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> countVoyagesByStatut(@PathVariable String statut) {
         try {
             VoyageStatus voyageStatus = VoyageStatus.valueOf(statut.toUpperCase());

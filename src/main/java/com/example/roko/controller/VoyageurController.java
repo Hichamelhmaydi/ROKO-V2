@@ -20,6 +20,7 @@ public class VoyageurController {
     private final VoyageurService voyageurService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageurDTO> createVoyageur(@RequestBody VoyageurDTO voyageurDTO) {
         try {
             VoyageurDTO createdVoyageur = voyageurService.createVoyageur(voyageurDTO);
@@ -30,12 +31,14 @@ public class VoyageurController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<VoyageurDTO>> getAllVoyageurs() {
         List<VoyageurDTO> voyageurs = voyageurService.getAllVoyageurs();
         return ResponseEntity.ok(voyageurs);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<VoyageurDTO> getVoyageurById(@PathVariable Long id) {
         try {
             VoyageurDTO voyageur = voyageurService.getVoyageurById(id);
@@ -46,6 +49,7 @@ public class VoyageurController {
     }
 
     @GetMapping("/email/{email}")
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
     public ResponseEntity<VoyageurDTO> getVoyageurByEmail(@PathVariable String email) {
         try {
             VoyageurDTO voyageur = voyageurService.getVoyageurByEmail(email);
@@ -56,6 +60,7 @@ public class VoyageurController {
     }
 
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<VoyageurDTO>> getVoyageursByStatus(@PathVariable String status) {
         try {
             CompteStatus compteStatus = CompteStatus.valueOf(status.toUpperCase());
@@ -67,12 +72,14 @@ public class VoyageurController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<VoyageurDTO>> searchVoyageurs(@RequestParam String query) {
         List<VoyageurDTO> voyageurs = voyageurService.searchVoyageurs(query);
         return ResponseEntity.ok(voyageurs);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<VoyageurDTO> updateVoyageur(
             @PathVariable Long id,
             @RequestBody VoyageurDTO voyageurDTO) {
@@ -85,6 +92,7 @@ public class VoyageurController {
     }
 
     @PatchMapping("/{id}/toggle-status")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<VoyageurDTO> toggleVoyageurStatus(@PathVariable Long id) {
         try {
             VoyageurDTO updatedVoyageur = voyageurService.toggleVoyageurStatus(id);
@@ -95,6 +103,7 @@ public class VoyageurController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<Void> deleteVoyageur(@PathVariable Long id) {
         try {
             voyageurService.deleteVoyageur(id);
@@ -117,12 +126,14 @@ public class VoyageurController {
     }
 
     @GetMapping("/stats/active")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> countActiveVoyageurs() {
         long count = voyageurService.countActiveVoyageurs();
         return ResponseEntity.ok(count);
     }
 
     @GetMapping("/stats/total")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Long> countAllVoyageurs() {
         long count = voyageurService.countAllVoyageurs();
         return ResponseEntity.ok(count);
