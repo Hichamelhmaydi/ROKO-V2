@@ -40,13 +40,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder
-                = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder
-                .userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder());
-        return authenticationManagerBuilder.build();
+    public AuthenticationManager authenticationManager(
+            org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public org.springframework.security.authentication.AuthenticationProvider authenticationProvider() {
+        org.springframework.security.authentication.dao.DaoAuthenticationProvider provider =
+            new org.springframework.security.authentication.dao.DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
@@ -64,6 +69,8 @@ public class SecurityConfig {
                 // Public auth endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/api/paiements/webhook").permitAll()
+                // Public file access (images)
+                .requestMatchers(HttpMethod.GET, "/api/files/**").permitAll()
                 // Auth endpoints requiring authentication
                 .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
                 .requestMatchers("/api/auth/register-admin").hasRole("ADMIN")

@@ -332,4 +332,144 @@ public class PaymentService {
             }
         }
     }
+
+    /**
+     * Traite evenement checkout.session.completed de Stripe
+     * Appele automatiquement par le webhook quand le paiement est complete
+     */
+    public void handleCheckoutSessionCompleted(String sessionId) {
+        log.info("Webhook: Traitement du checkout.session.completed pour la session {}", sessionId);
+
+        Payment payment = paymentRepository.findByStripeSessionId(sessionId).orElse(null);
+
+        if (payment == null) {
+            log.warn("Webhook: Aucun paiement trouve pour la session {}", sessionId);
+            return;
+        }
+
+        if (payment.getStatus() == PaymentStatus.REUSSI) {
+            log.info("Webhook: Paiement deja marque comme reussi pour la session {}", sessionId);
+            return;
+        }
+
+        payment.setStatus(PaymentStatus.REUSSI);
+        payment.setDatePaiement(LocalDateTime.now());
+
+        Reservations reservation = payment.getReservation();
+        if (reservation != null) {
+            reservation.setPaiementEffectue(true);
+            reservation.setDatePaiement(LocalDateTime.now());
+            reservation.setStatut(ReservationStatut.PAYEE);
+            reservationRepository.save(reservation);
+
+            notificationService.envoyerNotificationPaiementReussi(
+                    payment.getUserId(),
+                    reservation.getId());
+        }
+
+        paymentRepository.save(payment);
+        log.info("Webhook: Paiement confirme avec succes pour la session {}", sessionId);
+    }
+
+    /**
+     * Traite evenement checkout.session.expired de Stripe
+     */
+    public void handleCheckoutSessionExpired(String sessionId) {
+        log.info("Webhook: Traitement du checkout.session.expired pour la session {}", sessionId);
+
+        Payment payment = paymentRepository.findByStripeSessionId(sessionId).orElse(null);
+
+        if (payment == null) {
+            log.warn("Webhook: Aucun paiement trouve pour la session {}", sessionId);
+            return;
+        }
+
+        if (payment.getStatus() == PaymentStatus.EN_ATTENTE) {
+            payment.setStatus(PaymentStatus.ANNULE);
+            paymentRepository.save(payment);
+
+            Reservations reservation = payment.getReservation();
+            if (reservation != null) {
+                reservation.setStatut(ReservationStatut.EN_ATTENTE);
+                reservationRepository.save(reservation);
+            }
+
+            log.info("Webhook: Session expiree, paiement annule pour la session {}", sessionId);
+        }
+    }
+
+    /**
+     * Traite evenement payment_intent.payment_failed de Stripe
+     */
+    public void handlePaymentIntentFailed(String sessionId, String failureMessage) {
+        log.info("Webhook: Traitement du payment_intent.payment_failed pour la session {}", sessionId);
+
+        Payment payment = paymentRepository.findByStripeSessionId(sessionId).orElse(null);
+
+        if (payment == null) {
+            log.warn("Webhook: Aucun paiement trouve pour la session {}", sessionId);
+            return;
+        }
+
+        payment.setStatus(PaymentStatus.ECHOUE);
+        paymentRepository.save(payment);
+
+        Reservations reservation = payment.getReservation();
+        if (reservation != null) {
+            notificationService.envoyerNotificationPaiementEchoue(
+                    payment.getUserId(),
+                    reservation.getId(),
+                    failureMessage != null ? failureMessage : "Echec du paiement");
+        }
+
+        log.info("Webhook: Paiement marque comme echoue pour la session {}", sessionId);
+    }
+
+    /**
+     * Traite evenement charge.refunded de Stripe
+     */
+    public void handleChargeRefunded(String paymentIntentId) {
+        log.info("Webhook: Traitement du charge.refunded pour le payment_intent {}", paymentIntentId);
+
+        List<Payment> allPayments = paymentRepository.findAll();
+        Payment payment = null;
+
+        for (Payment p : allPayments) {
+            try {
+                String intentId = stripeService.getPaymentIntentId(p.getStripeSessionId());
+                if (paymentIntentId.equals(intentId)) {
+                    payment = p;
+                    break;
+                }
+            } catch (StripeException e) {
+                log.debug("Impossible de recuperer le payment_intent pour la session {}", p.getStripeSessionId());
+            }
+        }
+
+        if (payment == null) {
+            log.warn("Webhook: Aucun paiement trouve pour le payment_intent {}", paymentIntentId);
+            return;
+        }
+
+        if (payment.getStatus() == PaymentStatus.REMBOURSE) {
+            log.info("Webhook: Paiement deja marque comme rembourse");
+            return;
+        }
+
+        payment.setStatus(PaymentStatus.REMBOURSE);
+        paymentRepository.save(payment);
+
+        Reservations reservation = payment.getReservation();
+        if (reservation != null) {
+            reservation.setStatut(ReservationStatut.ANNULEE);
+            reservationRepository.save(reservation);
+
+            notificationService.envoyerNotificationRemboursement(
+                    payment.getUserId(),
+                    reservation.getId(),
+                    payment.getAmount());
+        }
+
+        log.info("Webhook: Paiement marque comme rembourse pour le payment_intent {}", paymentIntentId);
+    }
 }

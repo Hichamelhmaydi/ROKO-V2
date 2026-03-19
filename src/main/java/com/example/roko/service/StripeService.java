@@ -1,9 +1,12 @@
 package com.example.roko.service;
 
 import com.stripe.Stripe;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.model.Refund;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.stripe.param.RefundCreateParams;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,9 @@ public class StripeService {
     @Value("${stripe.api.key:}")
     private String stripeApiKey;
 
+    @Value("${stripe.webhook.secret:}")
+    private String webhookSecret;
+
     @Value("${stripe.success.url:http://localhost:4200/payment/success}")
     private String successUrl;
 
@@ -36,6 +42,29 @@ public class StripeService {
 
         Stripe.apiKey = stripeApiKey;
         log.info("Stripe API initialisée avec succès");
+
+        if (webhookSecret == null || webhookSecret.isBlank()) {
+            log.warn("Webhook secret Stripe non configuré: la validation des signatures webhook sera désactivée");
+        }
+    }
+
+    /**
+     * Valide la signature du webhook Stripe et retourne l'événement
+     */
+    public Event constructWebhookEvent(String payload, String sigHeader) throws SignatureVerificationException {
+        if (webhookSecret == null || webhookSecret.isBlank()) {
+            log.warn("Webhook secret non configuré, parsing de l'événement sans validation de signature");
+            return Event.GSON.fromJson(payload, Event.class);
+        }
+
+        return Webhook.constructEvent(payload, sigHeader, webhookSecret);
+    }
+
+    /**
+     * Vérifie si le webhook secret est configuré
+     */
+    public boolean isWebhookSecretConfigured() {
+        return webhookSecret != null && !webhookSecret.isBlank();
     }
 
     public Session createCheckoutSession(

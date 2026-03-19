@@ -36,6 +36,18 @@ public class VoyageController {
         return ResponseEntity.ok(voyages);
     }
 
+    @GetMapping("/actifs")
+    public ResponseEntity<List<VoyageDTO>> getVoyagesActifs() {
+        List<VoyageDTO> voyages = voyageService.getVoyagesDisponibles();
+        return ResponseEntity.ok(voyages);
+    }
+
+    @GetMapping("/disponibles")
+    public ResponseEntity<List<VoyageDTO>> getVoyagesDisponibles() {
+        List<VoyageDTO> voyages = voyageService.getVoyagesDisponibles();
+        return ResponseEntity.ok(voyages);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<VoyageDTO> getVoyageById(@PathVariable Long id) {
         try {
@@ -44,12 +56,6 @@ public class VoyageController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @GetMapping("/disponibles")
-    public ResponseEntity<List<VoyageDTO>> getVoyagesDisponibles() {
-        List<VoyageDTO> voyages = voyageService.getVoyagesDisponibles();
-        return ResponseEntity.ok(voyages);
     }
 
     @GetMapping("/destination/{destination}")

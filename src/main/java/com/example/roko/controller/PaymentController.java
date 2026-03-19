@@ -4,6 +4,14 @@ import com.example.roko.dto.response.PaymentDTO;
 import com.example.roko.enums.PaymentStatus;
 import com.example.roko.security.UserPrincipal;
 import com.example.roko.service.PaymentService;
+import com.example.roko.service.StripeService;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.StripeObject;
+import com.stripe.model.checkout.Session;
+import com.stripe.model.Charge;
+import com.stripe.model.PaymentIntent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,6 +33,7 @@ import java.util.Map;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final StripeService stripeService;
 
     @PostMapping("/create-session")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
@@ -67,11 +76,59 @@ public class PaymentController {
     @PostMapping("/webhook")
     public ResponseEntity<String> handleStripeWebhook(
             @RequestBody String payload,
-            @RequestHeader("Stripe-Signature") String sigHeader) {
+            @RequestHeader(value = "Stripe-Signature", required = false) String sigHeader) {
 
-        log.info("Webhook Stripe reçu");
+        log.info("Webhook Stripe recu");
 
-        return ResponseEntity.ok("Webhook reçu");
+        Event event;
+        try {
+            if (stripeService.isWebhookSecretConfigured() && sigHeader != null) {
+                event = stripeService.constructWebhookEvent(payload, sigHeader);
+            } else {
+                log.warn("Webhook sans validation de signature (mode dev)");
+                event = Event.GSON.fromJson(payload, Event.class);
+            }
+        } catch (SignatureVerificationException e) {
+            log.error("Signature webhook invalide: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Signature invalide");
+        } catch (Exception e) {
+            log.error("Erreur parsing webhook: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Payload invalide");
+        }
+
+        String eventType = event.getType();
+        log.info("Evenement Stripe: {}", eventType);
+
+        try {
+            EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
+            if (deserializer.getObject().isPresent()) {
+                StripeObject obj = deserializer.getObject().get();
+                switch (eventType) {
+                    case "checkout.session.completed":
+                        if (obj instanceof Session) {
+                            paymentService.handleCheckoutSessionCompleted(((Session) obj).getId());
+                        }
+                        break;
+                    case "checkout.session.expired":
+                        if (obj instanceof Session) {
+                            paymentService.handleCheckoutSessionExpired(((Session) obj).getId());
+                        }
+                        break;
+                    case "charge.refunded":
+                        if (obj instanceof Charge) {
+                            String piId = ((Charge) obj).getPaymentIntent();
+                            if (piId != null) paymentService.handleChargeRefunded(piId);
+                        }
+                        break;
+                    default:
+                        log.info("Evenement non gere: {}", eventType);
+                }
+            }
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            log.error("Erreur traitement webhook: {}", e.getMessage(), e);
+            return ResponseEntity.ok("Erreur traitement");
+        }
     }
 
     @GetMapping

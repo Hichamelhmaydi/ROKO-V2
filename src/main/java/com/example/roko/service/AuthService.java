@@ -11,6 +11,7 @@ import com.example.roko.repository.UserRepository;
 import com.example.roko.security.UserPrincipal;
 import com.example.roko.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -31,19 +33,50 @@ public class AuthService {
 
     // LOGIN
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+        log.info("=== DEBUT LOGIN ===");
+        log.info("Email reçu: {}", loginRequest.getEmail());
+        log.info("Mot de passe reçu (longueur): {}", loginRequest.getPassword() != null ? loginRequest.getPassword().length() : 0);
+
+        // Vérifier si l'utilisateur existe
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
+        if (user == null) {
+            log.error("Utilisateur non trouvé avec l'email: {}", loginRequest.getEmail());
+            throw new RuntimeException("Email ou mot de passe incorrect");
+        }
+
+        log.info("Utilisateur trouvé: {}", user.getEmail());
+        log.info("Type d'utilisateur: {}", user.getClass().getSimpleName());
+        log.info("Actif: {}", user.getActif());
+        log.info("Bloqué: {}", user.getBloque());
+        log.info("Hash du mot de passe en DB: {}", user.getPassword());
+
+        // Vérifier le mot de passe
+        boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
+        log.info("Mot de passe correspond: {}", passwordMatches);
+
+        if (!passwordMatches) {
+            log.error("Mot de passe incorrect pour l'email: {}", loginRequest.getEmail());
+            throw new RuntimeException("Email ou mot de passe incorrect");
+        }
+
         // Authentifier l'utilisateur
+        log.info("Tentative d'authentification avec AuthenticationManager...");
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
                         loginRequest.getPassword()
                 )
         );
+        log.info("Authentification réussie!");
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Générer le token JWT
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         String token = jwtUtil.generateToken(userPrincipal);
+
+        log.info("Token JWT généré avec succès");
+        log.info("=== FIN LOGIN ===");
 
         // Retourner la réponse
         return new AuthResponseDTO(
