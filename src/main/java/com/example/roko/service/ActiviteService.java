@@ -2,11 +2,13 @@ package com.example.roko.service;
 
 import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
+import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.entity.Voyages;
 import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.exception.BusinessException;
 import com.example.roko.mapper.ActiviteMapper;
 import com.example.roko.repository.ActiviteRepository;
+import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +26,14 @@ public class ActiviteService {
     private final ActiviteRepository activiteRepository;
     private final VoyageRepository voyageRepository;
     private final ActiviteMapper activiteMapper;
+    private final ActiviteVoyageRepository activiteVoyageRepository;
 
     public ActiviteDTO createActivite(ActiviteDTO activiteDTO) {
         log.info("Création d'une nouvelle activité: {}", activiteDTO.getNom());
 
         Voyages voyage = voyageRepository.findById(activiteDTO.getVoyageId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Voyage non trouvé avec l'ID: " + activiteDTO.getVoyageId()));
+                "Voyage non trouvé avec l'ID: " + activiteDTO.getVoyageId()));
 
         if (activiteRepository.existsByNomAndVoyageId(activiteDTO.getNom(), activiteDTO.getVoyageId())) {
             throw new BusinessException(
@@ -43,9 +46,20 @@ public class ActiviteService {
         Activites savedActivite = activiteRepository.save(activite);
         log.info("Activité créée avec succès. ID: {}", savedActivite.getId());
 
+        // Créer automatiquement l'entrée dans activites_voyages (optionnelle par défaut)
+        if (!activiteVoyageRepository.existsByActiviteIdAndVoyageId(savedActivite.getId(), voyage.getId())) {
+            Activites_Voyages activiteVoyage = new Activites_Voyages();
+            activiteVoyage.setActivite(savedActivite);
+            activiteVoyage.setVoyage(voyage);
+            activiteVoyage.setObligatoire(false);
+            activiteVoyage.setDisponible(true);
+            activiteVoyage.setPrix(null); // utilise activite.prix comme fallback
+            activiteVoyageRepository.save(activiteVoyage);
+            log.info("Association activite_voyage créée automatiquement pour l'activité {}", savedActivite.getId());
+        }
+
         return activiteMapper.toDTO(savedActivite);
     }
-
 
     @Transactional(readOnly = true)
     public List<ActiviteDTO> getAllActivites() {
@@ -54,26 +68,23 @@ public class ActiviteService {
         return activiteMapper.toDTOList(activites);
     }
 
-
     @Transactional(readOnly = true)
     public ActiviteDTO getActiviteById(Long id) {
         log.info("Récupération de l'activité avec l'ID: {}", id);
         Activites activite = activiteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Activité non trouvée avec l'ID: " + id));
+                "Activité non trouvée avec l'ID: " + id));
         return activiteMapper.toDTO(activite);
     }
-
 
     @Transactional(readOnly = true)
     public ActiviteDTO getActiviteByIdWithReservations(Long id) {
         log.info("Récupération de l'activité avec réservations. ID: {}", id);
         Activites activite = activiteRepository.findByIdWithReservations(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Activité non trouvée avec l'ID: " + id));
+                "Activité non trouvée avec l'ID: " + id));
         return activiteMapper.toDTO(activite);
     }
-
 
     @Transactional(readOnly = true)
     public List<ActiviteDTO> getActivitesByVoyageId(Long voyageId) {
@@ -87,7 +98,6 @@ public class ActiviteService {
         return activiteMapper.toDTOList(activites);
     }
 
-
     @Transactional(readOnly = true)
     public List<ActiviteDTO> getActivitesByVoyageIdWithReservations(Long voyageId) {
         log.info("Récupération des activités avec réservations pour le voyage ID: {}", voyageId);
@@ -99,7 +109,6 @@ public class ActiviteService {
         List<Activites> activites = activiteRepository.findByVoyageIdWithReservations(voyageId);
         return activiteMapper.toDTOList(activites);
     }
-
 
     @Transactional(readOnly = true)
     public List<ActiviteDTO> searchActivitesByNom(String nom) {
@@ -115,7 +124,6 @@ public class ActiviteService {
         return activiteMapper.toDTOList(activites);
     }
 
-
     @Transactional(readOnly = true)
     public List<ActiviteDTO> getMostPopularActivites() {
         log.info("Récupération des activités les plus populaires");
@@ -123,20 +131,19 @@ public class ActiviteService {
         return activiteMapper.toDTOList(activites);
     }
 
-
     public ActiviteDTO updateActivite(Long id, ActiviteDTO activiteDTO) {
         log.info("Mise à jour de l'activité ID: {}", id);
 
         Activites existingActivite = activiteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Activité non trouvée avec l'ID: " + id));
+                "Activité non trouvée avec l'ID: " + id));
 
-        if (activiteDTO.getVoyageId() != null &&
-                !existingActivite.getVoyage().getId().equals(activiteDTO.getVoyageId())) {
+        if (activiteDTO.getVoyageId() != null
+                && !existingActivite.getVoyage().getId().equals(activiteDTO.getVoyageId())) {
 
             Voyages newVoyage = voyageRepository.findById(activiteDTO.getVoyageId())
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "Voyage non trouvé avec l'ID: " + activiteDTO.getVoyageId()));
+                    "Voyage non trouvé avec l'ID: " + activiteDTO.getVoyageId()));
 
             if (activiteRepository.existsByNomAndVoyageId(activiteDTO.getNom(), activiteDTO.getVoyageId())) {
                 throw new BusinessException(
@@ -154,24 +161,22 @@ public class ActiviteService {
         return activiteMapper.toDTO(updatedActivite);
     }
 
-
     public void deleteActivite(Long id) {
         log.info("Tentative de suppression de l'activité ID: {}", id);
 
         Activites activite = activiteRepository.findByIdWithReservations(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Activité non trouvée avec l'ID: " + id));
+                "Activité non trouvée avec l'ID: " + id));
 
         if (activite.getReservations() != null && !activite.getReservations().isEmpty()) {
             throw new BusinessException(
-                    "Impossible de supprimer cette activité car elle est associée à " +
-                            activite.getReservations().size() + " réservation(s)");
+                    "Impossible de supprimer cette activité car elle est associée à "
+                    + activite.getReservations().size() + " réservation(s)");
         }
 
         activiteRepository.deleteById(id);
         log.info("Activité supprimée avec succès. ID: {}", id);
     }
-
 
     public void forceDeleteActivite(Long id) {
         log.warn("Suppression forcée de l'activité ID: {}", id);
@@ -184,13 +189,11 @@ public class ActiviteService {
         log.info("Activité supprimée de force. ID: {}", id);
     }
 
-
     @Transactional(readOnly = true)
     public long countActivitesByVoyageId(Long voyageId) {
         log.info("Comptage des activités pour le voyage ID: {}", voyageId);
         return activiteRepository.countByVoyageId(voyageId);
     }
-
 
     @Transactional(readOnly = true)
     public boolean activiteExists(Long id) {

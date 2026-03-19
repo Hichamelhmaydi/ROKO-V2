@@ -67,6 +67,21 @@ public class ReservationService {
             throw new BusinessException("Ce voyage n'est plus disponible pour la réservation");
         }
 
+        // Vérifier que le nombre de personnes est valide
+        int nombrePersonnes = reservationDTO.getNombrePersonnes() != null ? reservationDTO.getNombrePersonnes() : 0;
+        if (nombrePersonnes < 1) {
+            throw new BusinessException("Le nombre de personnes doit être au moins 1");
+        }
+
+        // Vérifier que la date de départ du voyage n'est pas déjà passée
+        try {
+            java.time.LocalDate dateDepart = java.time.LocalDate.parse(voyage.getDateDepart());
+            if (!dateDepart.isAfter(java.time.LocalDate.now())) {
+                throw new BusinessException("Impossible de réserver un voyage dont la date de départ est déjà passée");
+            }
+        } catch (java.time.format.DateTimeParseException ignored) {
+        }
+
         Reservations reservation = new Reservations();
         reservation.setVoyageur(voyageur);
         reservation.setVoyage(voyage);

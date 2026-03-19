@@ -14,9 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -28,17 +28,16 @@ public class ActiviteVoyageService {
     private final ActiviteRepository activiteRepository;
     private final VoyageRepository voyageRepository;
 
-
     public ActiviteVoyageDTO associerActiviteAVoyage(ActiviteVoyageDTO dto) {
         log.info("Association activité {} au voyage {}", dto.getActiviteId(), dto.getVoyageId());
 
         Activites activite = activiteRepository.findById(dto.getActiviteId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Activité non trouvée avec l'ID: " + dto.getActiviteId()));
+                "Activité non trouvée avec l'ID: " + dto.getActiviteId()));
 
         Voyages voyage = voyageRepository.findById(dto.getVoyageId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Voyage non trouvé avec l'ID: " + dto.getVoyageId()));
+                "Voyage non trouvé avec l'ID: " + dto.getVoyageId()));
 
         if (activiteVoyageRepository.existsByActiviteIdAndVoyageId(
                 dto.getActiviteId(), dto.getVoyageId())) {
@@ -60,9 +59,18 @@ public class ActiviteVoyageService {
         Activites_Voyages saved = activiteVoyageRepository.save(activiteVoyage);
         log.info("Association créée avec succès. ID: {}", saved.getId());
 
+        // Si l'activité est obligatoire, mettre à jour le prix de base du voyage
+        if (Boolean.TRUE.equals(saved.getObligatoire())) {
+            BigDecimal prixActivite = saved.getPrix() != null && saved.getPrix().compareTo(BigDecimal.ZERO) > 0
+                    ? saved.getPrix()
+                    : (activite.getPrix() != null ? activite.getPrix() : BigDecimal.ZERO);
+            voyage.setPrixBase(voyage.getPrixBase().add(prixActivite));
+            voyageRepository.save(voyage);
+            log.info("Prix du voyage {} mis à jour: +{}", voyage.getId(), prixActivite);
+        }
+
         return toDTO(saved);
     }
-
 
     @Transactional(readOnly = true)
     public List<ActiviteVoyageDTO> getActivitesByVoyage(Long voyageId) {
@@ -92,49 +100,49 @@ public class ActiviteVoyageService {
                 .collect(Collectors.toList());
     }
 
-
     @Transactional(readOnly = true)
     public List<ActiviteVoyageDTO> getActivitesObligatoires(Long voyageId) {
         log.info("Récupération des activités obligatoires du voyage {}", voyageId);
 
-        List<Activites_Voyages> associations =
-                activiteVoyageRepository.findObligatoiresByVoyageId(voyageId);
+        List<Activites_Voyages> associations
+                = activiteVoyageRepository.findObligatoiresByVoyageId(voyageId);
         return associations.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
-
 
     @Transactional(readOnly = true)
     public List<ActiviteVoyageDTO> getActivitesOptionnelles(Long voyageId) {
         log.info("Récupération des activités optionnelles du voyage {}", voyageId);
 
-        List<Activites_Voyages> associations =
-                activiteVoyageRepository.findOptionellesByVoyageId(voyageId);
+        List<Activites_Voyages> associations
+                = activiteVoyageRepository.findOptionellesByVoyageId(voyageId);
         return associations.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
-
 
     @Transactional(readOnly = true)
     public List<ActiviteVoyageDTO> getActivitesByJour(Long voyageId, String jour) {
         log.info("Récupération des activités du jour {} pour le voyage {}", jour, voyageId);
 
-        List<Activites_Voyages> associations =
-                activiteVoyageRepository.findByVoyageIdAndJour(voyageId, jour);
+        List<Activites_Voyages> associations
+                = activiteVoyageRepository.findByVoyageIdAndJour(voyageId, jour);
         return associations.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
-
 
     public ActiviteVoyageDTO updateAssociation(Long id, ActiviteVoyageDTO dto) {
         log.info("Mise à jour de l'association {}", id);
 
         Activites_Voyages association = activiteVoyageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Association non trouvée avec l'ID: " + id));
+                "Association non trouvée avec l'ID: " + id));
+
+        // Capturer l'état avant modification pour le calcul du prix
+        Boolean oldObligatoire = association.getObligatoire();
+        BigDecimal oldPrix = resolveEffectivePrix(association);
 
         if (dto.getPrix() != null) {
             association.setPrix(dto.getPrix());
@@ -159,11 +167,30 @@ public class ActiviteVoyageService {
         }
 
         Activites_Voyages updated = activiteVoyageRepository.save(association);
-        log.info("Association mise à jour avec succès");
 
+        // Ajuster le prix de base du voyage selon les changements
+        boolean wasObligatoire = Boolean.TRUE.equals(oldObligatoire);
+        boolean isObligatoire = Boolean.TRUE.equals(updated.getObligatoire());
+        BigDecimal newPrix = resolveEffectivePrix(updated);
+        Voyages voyage = updated.getVoyage();
+
+        if (wasObligatoire && !isObligatoire) {
+            voyage.setPrixBase(voyage.getPrixBase().subtract(oldPrix).max(BigDecimal.ZERO));
+            voyageRepository.save(voyage);
+            log.info("Prix du voyage {} mis à jour (retrait obligatoire): -{}", voyage.getId(), oldPrix);
+        } else if (!wasObligatoire && isObligatoire) {
+            voyage.setPrixBase(voyage.getPrixBase().add(newPrix));
+            voyageRepository.save(voyage);
+            log.info("Prix du voyage {} mis à jour (ajout obligatoire): +{}", voyage.getId(), newPrix);
+        } else if (wasObligatoire && isObligatoire && oldPrix.compareTo(newPrix) != 0) {
+            voyage.setPrixBase(voyage.getPrixBase().subtract(oldPrix).add(newPrix).max(BigDecimal.ZERO));
+            voyageRepository.save(voyage);
+            log.info("Prix du voyage {} mis à jour (changement prix obligatoire): {} -> {}", voyage.getId(), oldPrix, newPrix);
+        }
+
+        log.info("Association mise à jour avec succès");
         return toDTO(updated);
     }
-
 
     public void dissocierActiviteDeVoyage(Long activiteId, Long voyageId) {
         log.info("Dissociation de l'activité {} du voyage {}", activiteId, voyageId);
@@ -171,22 +198,38 @@ public class ActiviteVoyageService {
         Activites_Voyages association = activiteVoyageRepository
                 .findByActiviteIdAndVoyageId(activiteId, voyageId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Association non trouvée entre l'activité " + activiteId +
-                                " et le voyage " + voyageId));
+                "Association non trouvée entre l'activité " + activiteId
+                + " et le voyage " + voyageId));
+
+        // Si l'activité était obligatoire, soustraire son prix du voyage
+        if (Boolean.TRUE.equals(association.getObligatoire())) {
+            BigDecimal prix = resolveEffectivePrix(association);
+            Voyages voyage = association.getVoyage();
+            voyage.setPrixBase(voyage.getPrixBase().subtract(prix).max(BigDecimal.ZERO));
+            voyageRepository.save(voyage);
+            log.info("Prix du voyage {} mis à jour (dissociation obligatoire): -{}", voyage.getId(), prix);
+        }
 
         activiteVoyageRepository.delete(association);
         log.info("Dissociation effectuée avec succès");
     }
 
-
     public void deleteAssociation(Long id) {
         log.info("Suppression de l'association {}", id);
 
-        if (!activiteVoyageRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Association non trouvée avec l'ID: " + id);
+        Activites_Voyages association = activiteVoyageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Association non trouvée avec l'ID: " + id));
+
+        // Si l'activité était obligatoire, soustraire son prix du voyage
+        if (Boolean.TRUE.equals(association.getObligatoire())) {
+            BigDecimal prix = resolveEffectivePrix(association);
+            Voyages voyage = association.getVoyage();
+            voyage.setPrixBase(voyage.getPrixBase().subtract(prix).max(BigDecimal.ZERO));
+            voyageRepository.save(voyage);
+            log.info("Prix du voyage {} mis à jour (suppression obligatoire): -{}", voyage.getId(), prix);
         }
 
-        activiteVoyageRepository.deleteById(id);
+        activiteVoyageRepository.delete(association);
         log.info("Association supprimée avec succès");
     }
 
@@ -195,12 +238,18 @@ public class ActiviteVoyageService {
         return activiteVoyageRepository.countByVoyageId(voyageId);
     }
 
-
     @Transactional(readOnly = true)
     public long countActivitesObligatoires(Long voyageId) {
         return activiteVoyageRepository.countObligatoiresByVoyageId(voyageId);
     }
 
+    private BigDecimal resolveEffectivePrix(Activites_Voyages association) {
+        if (association.getPrix() != null && association.getPrix().compareTo(BigDecimal.ZERO) > 0) {
+            return association.getPrix();
+        }
+        Activites activite = association.getActivite();
+        return activite.getPrix() != null ? activite.getPrix() : BigDecimal.ZERO;
+    }
 
     private ActiviteVoyageDTO toDTO(Activites_Voyages entity) {
         ActiviteVoyageDTO dto = new ActiviteVoyageDTO();

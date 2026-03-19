@@ -98,6 +98,25 @@ public class AuthService {
             throw new RuntimeException("Un compte avec cet email existe déjà");
         }
 
+        // Vérifier que le numéro CIN est fourni
+        if (registerRequest.getIdNational() == null || registerRequest.getIdNational().isBlank()) {
+            throw new RuntimeException("Le numéro de pièce d'identité est obligatoire");
+        }
+
+        // Vérifier que la date d'expiration du CIN est dans le futur
+        String dateExpiration = registerRequest.getDateExpiration();
+        if (dateExpiration == null || dateExpiration.isBlank()) {
+            throw new RuntimeException("La date d'expiration de la pièce d'identité est obligatoire");
+        }
+        try {
+            java.time.LocalDate expDate = java.time.LocalDate.parse(dateExpiration);
+            if (!expDate.isAfter(java.time.LocalDate.now())) {
+                throw new RuntimeException("La date d'expiration de la pièce d'identité est dépassée. Veuillez présenter un document valide.");
+            }
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new RuntimeException("Format de date d'expiration invalide (attendu: AAAA-MM-JJ)");
+        }
+
         // Créer un nouveau voyageur
         Voyageurs voyageur = new Voyageurs();
         voyageur.setNom(registerRequest.getNom());
