@@ -53,7 +53,7 @@ public class ActiviteService {
             activiteVoyage.setVoyage(voyage);
             activiteVoyage.setObligatoire(false);
             activiteVoyage.setDisponible(true);
-            activiteVoyage.setPrix(null); // utilise activite.prix comme fallback
+            activiteVoyage.setPrix(savedActivite.getPrix());
             activiteVoyageRepository.save(activiteVoyage);
             log.info("Association activite_voyage créée automatiquement pour l'activité {}", savedActivite.getId());
         }

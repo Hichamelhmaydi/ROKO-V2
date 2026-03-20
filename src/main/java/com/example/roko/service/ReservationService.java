@@ -7,6 +7,7 @@ import com.example.roko.exception.BusinessException;
 import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.mapper.ReservationMapper;
 import com.example.roko.repository.ActiviteRepository;
+import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.UserRepository;
 import com.example.roko.repository.VoyageRepository;
@@ -34,6 +35,7 @@ public class ReservationService {
     private final VoyageRepository voyageRepository;
     private final UserRepository userRepository;
     private final ActiviteRepository activiteRepository;
+    private final ActiviteVoyageRepository activiteVoyageRepository;
     private final ReservationMapper reservationMapper;
     private final NotificationService notificationService;
 
@@ -99,8 +101,13 @@ public class ReservationService {
         BigDecimal prixBase = voyage.getPrixBase() != null ? voyage.getPrixBase() : BigDecimal.ZERO;
         reservation.setPrixBase(prixBase);
 
-        Set<Activites> activitesSelectionnees = resolveAndValidateActivities(
-                reservationDTO.getActivitesOptionnellesIds(), voyage);
+        Set<Long> mandatoryIds = getMandatoryActivityIds(voyage.getId());
+        Set<Long> selectedIds = new HashSet<>(mandatoryIds);
+        if (reservationDTO.getActivitesOptionnellesIds() != null) {
+            selectedIds.addAll(reservationDTO.getActivitesOptionnellesIds());
+        }
+
+        Set<Activites> activitesSelectionnees = resolveAndValidateActivities(selectedIds, voyage);
         reservation.setActivites(activitesSelectionnees);
 
         BigDecimal prixActivites = calculateActivitiesTotal(
@@ -255,11 +262,14 @@ public class ReservationService {
 
         reservationMapper.updateEntityFromDTO(reservationDTO, reservation);
 
+        Set<Long> mandatoryIds = getMandatoryActivityIds(reservation.getVoyage().getId());
+        Set<Long> selectedIds = new HashSet<>(mandatoryIds);
         if (reservationDTO.getActivitesOptionnellesIds() != null) {
-            Set<Activites> activitesSelectionnees = resolveAndValidateActivities(
-                    reservationDTO.getActivitesOptionnellesIds(), reservation.getVoyage());
-            reservation.setActivites(activitesSelectionnees);
+            selectedIds.addAll(reservationDTO.getActivitesOptionnellesIds());
         }
+
+        Set<Activites> activitesSelectionnees = resolveAndValidateActivities(selectedIds, reservation.getVoyage());
+        reservation.setActivites(activitesSelectionnees);
 
         BigDecimal prixBase = reservation.getVoyage().getPrixBase() != null
                 ? reservation.getVoyage().getPrixBase()
@@ -323,7 +333,13 @@ public class ReservationService {
         return reservationMapper.toDTO(updatedReservation);
     }
 
-    private Set<Activites> resolveAndValidateActivities(List<Long> activitesIds, Voyages voyage) {
+    private Set<Long> getMandatoryActivityIds(Long voyageId) {
+        return activiteVoyageRepository.findObligatoiresByVoyageId(voyageId).stream()
+                .map(av -> av.getActivite().getId())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private Set<Activites> resolveAndValidateActivities(Set<Long> activitesIds, Voyages voyage) {
         if (activitesIds == null || activitesIds.isEmpty()) {
             return new HashSet<>();
         }
@@ -334,13 +350,8 @@ public class ReservationService {
                     .orElseThrow(() -> new ResourceNotFoundException(
                     "Activité non trouvée avec l'ID: " + activiteId));
 
-            boolean appartientAuVoyage = activite.getVoyage() != null
-                    && activite.getVoyage().getId().equals(voyage.getId());
-
-            if (!appartientAuVoyage) {
-                appartientAuVoyage = activite.getActivitesVoyages().stream()
-                        .anyMatch(av -> av.getVoyage().getId().equals(voyage.getId()));
-            }
+            boolean appartientAuVoyage = activiteVoyageRepository
+                    .existsByActiviteIdAndVoyageId(activiteId, voyage.getId());
 
             if (!appartientAuVoyage) {
                 throw new BusinessException(
