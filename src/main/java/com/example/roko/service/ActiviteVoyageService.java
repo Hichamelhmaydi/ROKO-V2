@@ -59,15 +59,7 @@ public class ActiviteVoyageService {
         Activites_Voyages saved = activiteVoyageRepository.save(activiteVoyage);
         log.info("Association créée avec succès. ID: {}", saved.getId());
 
-        // Si l'activité est obligatoire, mettre à jour le prix de base du voyage
-        if (Boolean.TRUE.equals(saved.getObligatoire())) {
-            BigDecimal prixActivite = saved.getPrix() != null && saved.getPrix().compareTo(BigDecimal.ZERO) > 0
-                    ? saved.getPrix()
-                    : (activite.getPrix() != null ? activite.getPrix() : BigDecimal.ZERO);
-            voyage.setPrixBase(voyage.getPrixBase().add(prixActivite));
-            voyageRepository.save(voyage);
-            log.info("Prix du voyage {} mis à jour: +{}", voyage.getId(), prixActivite);
-        }
+        recalculateVoyagePricing(voyage);
 
         return toDTO(saved);
     }
@@ -175,16 +167,13 @@ public class ActiviteVoyageService {
         Voyages voyage = updated.getVoyage();
 
         if (wasObligatoire && !isObligatoire) {
-            voyage.setPrixBase(voyage.getPrixBase().subtract(oldPrix).max(BigDecimal.ZERO));
-            voyageRepository.save(voyage);
+            recalculateVoyagePricing(voyage);
             log.info("Prix du voyage {} mis à jour (retrait obligatoire): -{}", voyage.getId(), oldPrix);
         } else if (!wasObligatoire && isObligatoire) {
-            voyage.setPrixBase(voyage.getPrixBase().add(newPrix));
-            voyageRepository.save(voyage);
+            recalculateVoyagePricing(voyage);
             log.info("Prix du voyage {} mis à jour (ajout obligatoire): +{}", voyage.getId(), newPrix);
         } else if (wasObligatoire && isObligatoire && oldPrix.compareTo(newPrix) != 0) {
-            voyage.setPrixBase(voyage.getPrixBase().subtract(oldPrix).add(newPrix).max(BigDecimal.ZERO));
-            voyageRepository.save(voyage);
+            recalculateVoyagePricing(voyage);
             log.info("Prix du voyage {} mis à jour (changement prix obligatoire): {} -> {}", voyage.getId(), oldPrix, newPrix);
         }
 
@@ -201,16 +190,11 @@ public class ActiviteVoyageService {
                 "Association non trouvée entre l'activité " + activiteId
                 + " et le voyage " + voyageId));
 
-        // Si l'activité était obligatoire, soustraire son prix du voyage
-        if (Boolean.TRUE.equals(association.getObligatoire())) {
-            BigDecimal prix = resolveEffectivePrix(association);
-            Voyages voyage = association.getVoyage();
-            voyage.setPrixBase(voyage.getPrixBase().subtract(prix).max(BigDecimal.ZERO));
-            voyageRepository.save(voyage);
-            log.info("Prix du voyage {} mis à jour (dissociation obligatoire): -{}", voyage.getId(), prix);
-        }
+        // Réévaluer les prix du voyage après dissociation
+        Voyages voyage = association.getVoyage();
 
         activiteVoyageRepository.delete(association);
+        recalculateVoyagePricing(voyage);
         log.info("Dissociation effectuée avec succès");
     }
 
@@ -220,16 +204,10 @@ public class ActiviteVoyageService {
         Activites_Voyages association = activiteVoyageRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Association non trouvée avec l'ID: " + id));
 
-        // Si l'activité était obligatoire, soustraire son prix du voyage
-        if (Boolean.TRUE.equals(association.getObligatoire())) {
-            BigDecimal prix = resolveEffectivePrix(association);
-            Voyages voyage = association.getVoyage();
-            voyage.setPrixBase(voyage.getPrixBase().subtract(prix).max(BigDecimal.ZERO));
-            voyageRepository.save(voyage);
-            log.info("Prix du voyage {} mis à jour (suppression obligatoire): -{}", voyage.getId(), prix);
-        }
+        Voyages voyage = association.getVoyage();
 
         activiteVoyageRepository.delete(association);
+        recalculateVoyagePricing(voyage);
         log.info("Association supprimée avec succès");
     }
 
@@ -249,6 +227,23 @@ public class ActiviteVoyageService {
         }
         Activites activite = association.getActivite();
         return activite.getPrix() != null ? activite.getPrix() : BigDecimal.ZERO;
+    }
+
+    private void recalculateVoyagePricing(Voyages voyage) {
+        BigDecimal currentPrixBase = voyage.getPrixBase() != null ? voyage.getPrixBase() : BigDecimal.ZERO;
+        BigDecimal prixInitial = voyage.getPrixInitial() != null ? voyage.getPrixInitial() : currentPrixBase;
+
+        if (voyage.getPrixInitial() == null) {
+            voyage.setPrixInitial(prixInitial);
+        }
+
+        BigDecimal mandatoryTotal = activiteVoyageRepository.findObligatoiresByVoyageId(voyage.getId())
+                .stream()
+                .map(this::resolveEffectivePrix)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        voyage.setPrixBase(prixInitial.add(mandatoryTotal));
+        voyageRepository.save(voyage);
     }
 
     private ActiviteVoyageDTO toDTO(Activites_Voyages entity) {

@@ -47,6 +47,9 @@ public class Voyages {
     @Column(length = 1000)
     private String itineraire;
 
+    @Column(name = "prix_initial", precision = 10, scale = 2)
+    private BigDecimal prixInitial;
+
     @Column(name = "prix_base", precision = 10, scale = 2, nullable = false)
     private BigDecimal prixBase = BigDecimal.ZERO;
 

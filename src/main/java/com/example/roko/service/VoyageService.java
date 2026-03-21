@@ -1,14 +1,17 @@
 package com.example.roko.service;
 
 import com.example.roko.dto.response.VoyageDTO;
+import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.mapper.VoyageMapper;
 import com.example.roko.entity.Voyages;
 import com.example.roko.enums.VoyageStatus;
+import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -18,10 +21,15 @@ public class VoyageService {
 
     private final VoyageRepository voyageRepository;
     private final VoyageMapper voyageMapper;
+    private final ActiviteVoyageRepository activiteVoyageRepository;
 
     public VoyageDTO createVoyage(VoyageDTO voyageDTO) {
         Voyages voyage = voyageMapper.toEntity(voyageDTO);
         voyage.setStatut(VoyageStatus.DISPONIBLE);
+        // Preserve the admin-defined initial price
+        if (voyage.getPrixBase() != null) {
+            voyage.setPrixInitial(voyage.getPrixBase());
+        }
 
         Voyages savedVoyage = voyageRepository.save(voyage);
         return voyageMapper.toDTO(savedVoyage);
@@ -94,7 +102,20 @@ public class VoyageService {
         existingVoyage.setDateRetour(voyageDTO.getDateRetour());
         existingVoyage.setItineraire(voyageDTO.getItineraire());
         if (voyageDTO.getPrixBase() != null) {
-            existingVoyage.setPrixBase(voyageDTO.getPrixBase());
+            // Admin is resetting the initial price; recalculate total with mandatory activities
+            BigDecimal newPrixInitial = voyageDTO.getPrixBase();
+            existingVoyage.setPrixInitial(newPrixInitial);
+            BigDecimal sumObligatoires = activiteVoyageRepository
+                    .findObligatoiresByVoyageId(existingVoyage.getId())
+                    .stream()
+                    .map(av -> {
+                        if (av.getPrix() != null && av.getPrix().compareTo(BigDecimal.ZERO) > 0) {
+                            return av.getPrix();
+                        }
+                        return av.getActivite().getPrix() != null ? av.getActivite().getPrix() : BigDecimal.ZERO;
+                    })
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            existingVoyage.setPrixBase(newPrixInitial.add(sumObligatoires));
         }
 
         if (voyageDTO.getPhotos() != null) {

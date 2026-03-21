@@ -27,6 +27,8 @@ public class VoyageMapper {
         dto.setDateRetour(voyage.getDateRetour());
         dto.setStatut(voyage.getStatut() != null ? voyage.getStatut().name() : null);
         dto.setItineraire(voyage.getItineraire());
+        // prixInitial may be null for legacy records created before this feature
+        dto.setPrixInitial(voyage.getPrixInitial() != null ? voyage.getPrixInitial() : voyage.getPrixBase());
         dto.setPrixBase(voyage.getPrixBase());
         dto.setPhotos(voyage.getPhotos() != null ? new ArrayList<>(voyage.getPhotos()) : new ArrayList<>());
 
@@ -47,6 +49,9 @@ public class VoyageMapper {
         voyage.setDateDepart(dto.getDateDepart());
         voyage.setDateRetour(dto.getDateRetour());
         voyage.setItineraire(dto.getItineraire());
+        if (dto.getPrixInitial() != null) {
+            voyage.setPrixInitial(dto.getPrixInitial());
+        }
         voyage.setPrixBase(dto.getPrixBase());
         voyage.setPhotos(dto.getPhotos() != null ? new ArrayList<>(dto.getPhotos()) : new ArrayList<>());
 

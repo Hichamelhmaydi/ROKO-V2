@@ -20,6 +20,7 @@ public class VoyageDTO {
     private String dateRetour;
     private String statut;
     private String itineraire;
+    private BigDecimal prixInitial;
     private BigDecimal prixBase;
     private List<String> photos;
 }
