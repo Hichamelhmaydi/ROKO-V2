@@ -33,7 +33,7 @@ public class Activites {
     private Set<Activites_Voyages> activitesVoyages = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "voyage_id", nullable = false)
+    @JoinColumn(name = "voyage_id")
     private Voyages voyage;
 
     @ManyToMany(mappedBy = "activites")

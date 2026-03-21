@@ -8,6 +8,7 @@ import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.mapper.ReservationMapper;
 import com.example.roko.repository.ActiviteRepository;
 import com.example.roko.repository.ActiviteVoyageRepository;
+import com.example.roko.repository.PaymentRepository;
 import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.UserRepository;
 import com.example.roko.repository.VoyageRepository;
@@ -36,6 +37,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final ActiviteRepository activiteRepository;
     private final ActiviteVoyageRepository activiteVoyageRepository;
+    private final PaymentRepository paymentRepository;
     private final ReservationMapper reservationMapper;
     private final NotificationService notificationService;
 
@@ -291,9 +293,15 @@ public class ReservationService {
     public void deleteReservation(Long id) {
         log.info("Suppression de la réservation ID: {}", id);
 
-        if (!reservationRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Réservation non trouvée avec l'ID: " + id);
+        Reservations reservation = reservationRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Réservation non trouvée avec l'ID: " + id));
+
+        if (reservation.getActivites() != null && !reservation.getActivites().isEmpty()) {
+            reservationRepository.deleteReservationActivitiesByReservationId(id);
+            reservation.getActivites().clear();
         }
+
+        paymentRepository.deleteByReservationId(id);
 
         reservationRepository.deleteById(id);
         log.info("Réservation supprimée avec succès. ID: {}", id);

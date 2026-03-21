@@ -107,6 +107,9 @@ public class VoyageurService {
         if (blocked) {
             voyageur.setActif(false);
             voyageur.setStatus(CompteStatus.DESACTIVER);
+        } else {
+            voyageur.setActif(true);
+            voyageur.setStatus(CompteStatus.ACTIVER);
         }
 
         Voyageurs updatedVoyageur = voyageurRepository.save(voyageur);

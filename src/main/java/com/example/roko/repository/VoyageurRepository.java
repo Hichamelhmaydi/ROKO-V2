@@ -25,5 +25,9 @@ public interface VoyageurRepository extends JpaRepository<Voyageurs, Long> {
 
     long countByStatus(CompteStatus status);
 
+    long countByStatusAndBloqueFalse(CompteStatus status);
+
+    long countByBloqueTrue();
+
     List<Voyageurs> findAllByStatusOrderByNomAsc(CompteStatus status);
 }

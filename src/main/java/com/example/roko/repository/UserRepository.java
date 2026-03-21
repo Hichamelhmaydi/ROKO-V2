@@ -34,6 +34,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             + "(:bloque IS NULL OR u.bloque = :bloque)", nativeQuery = true)
     long countByUserTypeAndStatus(
             @Param("userType") String userType,
-            @Param("status") CompteStatus status,
+            @Param("status") String status,
             @Param("bloque") Boolean bloque);
 }

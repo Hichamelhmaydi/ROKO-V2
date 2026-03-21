@@ -5,6 +5,7 @@ import com.example.roko.enums.ReservationStatut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -86,4 +87,23 @@ public interface ReservationRepository extends JpaRepository<Reservations, Long>
             @Param("userId") Long userId,
             @Param("voyageId") Long voyageId,
             @Param("statut") ReservationStatut statut);
+
+    @Query("SELECT r.id FROM Reservations r WHERE r.voyage.id = :voyageId")
+    List<Long> findIdsByVoyageId(@Param("voyageId") Long voyageId);
+
+    @Modifying
+    @Query(value = "DELETE FROM reservations_activites WHERE reservation_id = :reservationId", nativeQuery = true)
+    void deleteReservationActivitiesByReservationId(@Param("reservationId") Long reservationId);
+
+    @Modifying
+    @Query(value = "DELETE FROM reservations_activites WHERE reservation_id IN (:reservationIds)", nativeQuery = true)
+    void deleteReservationActivitiesByReservationIds(@Param("reservationIds") List<Long> reservationIds);
+
+    @Modifying
+    @Query(value = "DELETE FROM reservations_activites WHERE activite_id = :activiteId", nativeQuery = true)
+    void deleteReservationActivitiesByActiviteId(@Param("activiteId") Long activiteId);
+
+    @Modifying
+    @Query("DELETE FROM Reservations r WHERE r.voyage.id = :voyageId")
+    void deleteByVoyageId(@Param("voyageId") Long voyageId);
 }

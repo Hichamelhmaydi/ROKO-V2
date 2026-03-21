@@ -9,6 +9,7 @@ import com.example.roko.exception.BusinessException;
 import com.example.roko.mapper.ActiviteMapper;
 import com.example.roko.repository.ActiviteRepository;
 import com.example.roko.repository.ActiviteVoyageRepository;
+import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class ActiviteService {
     private final VoyageRepository voyageRepository;
     private final ActiviteMapper activiteMapper;
     private final ActiviteVoyageRepository activiteVoyageRepository;
+    private final ReservationRepository reservationRepository;
 
     public ActiviteDTO createActivite(ActiviteDTO activiteDTO) {
         log.info("Création d'une nouvelle activité: {}", activiteDTO.getNom());
@@ -164,15 +166,12 @@ public class ActiviteService {
     public void deleteActivite(Long id) {
         log.info("Tentative de suppression de l'activité ID: {}", id);
 
-        Activites activite = activiteRepository.findByIdWithReservations(id)
+        activiteRepository.findByIdWithReservations(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "Activité non trouvée avec l'ID: " + id));
 
-        if (activite.getReservations() != null && !activite.getReservations().isEmpty()) {
-            throw new BusinessException(
-                    "Impossible de supprimer cette activité car elle est associée à "
-                    + activite.getReservations().size() + " réservation(s)");
-        }
+        reservationRepository.deleteReservationActivitiesByActiviteId(id);
+        activiteVoyageRepository.deleteByActiviteId(id);
 
         activiteRepository.deleteById(id);
         log.info("Activité supprimée avec succès. ID: {}", id);
@@ -184,6 +183,9 @@ public class ActiviteService {
         if (!activiteRepository.existsById(id)) {
             throw new ResourceNotFoundException("Activité non trouvée avec l'ID: " + id);
         }
+
+        reservationRepository.deleteReservationActivitiesByActiviteId(id);
+        activiteVoyageRepository.deleteByActiviteId(id);
 
         activiteRepository.deleteById(id);
         log.info("Activité supprimée de force. ID: {}", id);

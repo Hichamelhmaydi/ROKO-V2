@@ -1,11 +1,13 @@
 package com.example.roko.service;
 
 import com.example.roko.dto.response.VoyageDTO;
-import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.mapper.VoyageMapper;
 import com.example.roko.entity.Voyages;
 import com.example.roko.enums.VoyageStatus;
 import com.example.roko.repository.ActiviteVoyageRepository;
+import com.example.roko.repository.ActiviteRepository;
+import com.example.roko.repository.PaymentRepository;
+import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ public class VoyageService {
     private final VoyageRepository voyageRepository;
     private final VoyageMapper voyageMapper;
     private final ActiviteVoyageRepository activiteVoyageRepository;
+    private final ActiviteRepository activiteRepository;
+    private final ReservationRepository reservationRepository;
+    private final PaymentRepository paymentRepository;
 
     public VoyageDTO createVoyage(VoyageDTO voyageDTO) {
         Voyages voyage = voyageMapper.toEntity(voyageDTO);
@@ -161,6 +166,17 @@ public class VoyageService {
         if (!voyageRepository.existsById(id)) {
             throw new RuntimeException("Voyage non trouvé avec l'ID: " + id);
         }
+
+        List<Long> reservationIds = reservationRepository.findIdsByVoyageId(id);
+        if (!reservationIds.isEmpty()) {
+            reservationRepository.deleteReservationActivitiesByReservationIds(reservationIds);
+            paymentRepository.deleteByReservationIds(reservationIds);
+        }
+
+        reservationRepository.deleteByVoyageId(id);
+        activiteVoyageRepository.deleteByVoyageId(id);
+        activiteRepository.detachVoyageByVoyageId(id);
+
         voyageRepository.deleteById(id);
     }
 

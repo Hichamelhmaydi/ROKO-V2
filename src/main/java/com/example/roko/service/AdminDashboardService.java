@@ -5,7 +5,7 @@ import com.example.roko.enums.CompteStatus;
 import com.example.roko.enums.ReservationStatut;
 import com.example.roko.enums.VoyageStatus;
 import com.example.roko.repository.ReservationRepository;
-import com.example.roko.repository.UserRepository;
+import com.example.roko.repository.VoyageurRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class AdminDashboardService {
 
     private final ReservationRepository reservationRepository;
     private final VoyageRepository voyageRepository;
-    private final UserRepository userRepository;
+    private final VoyageurRepository voyageurRepository;
 
     public AdminDashboardDTO getDashboardStats() {
         return new AdminDashboardDTO(
@@ -29,9 +29,9 @@ public class AdminDashboardService {
                 reservationRepository.countByStatut(ReservationStatut.ANNULEE),
                 voyageRepository.count(),
                 voyageRepository.countByStatut(VoyageStatus.DISPONIBLE),
-                userRepository.countByUserTypeAndStatus("VOYAGEUR", null, null),
-                userRepository.countByUserTypeAndStatus("VOYAGEUR", CompteStatus.ACTIVER, false),
-                userRepository.countByUserTypeAndStatus("VOYAGEUR", null, true)
+                voyageurRepository.count(),
+                voyageurRepository.countByStatusAndBloqueFalse(CompteStatus.ACTIVER),
+                voyageurRepository.countByBloqueTrue()
         );
     }
 }
