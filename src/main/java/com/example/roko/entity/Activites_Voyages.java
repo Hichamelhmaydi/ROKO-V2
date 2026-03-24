@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "activites_voyages")
 @Data
@@ -14,42 +12,22 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class Activites_Voyages {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private ActiviteVoyageId id;
 
+    @MapsId("activiteId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "activite_id", nullable = false)
     private Activites activite;
 
+    @MapsId("voyageId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voyage_id", nullable = false)
     private Voyages voyage;
 
-
-    @Column(precision = 10, scale = 2)
-    private BigDecimal prix;
-
-
-    @Column(nullable = false)
-    private Boolean obligatoire = false;
-
-
-    @Column(name = "ordre_affichage")
-    private Integer ordreAffichage;
-
-
-    @Column(name = "jour_prevu")
-    private String jourPrevu;
-
-    @Column(name = "duree_minutes")
-    private Integer dureeMinutes;
-
-
-    @Column(length = 500)
-    private String notes;
-
-
-    @Column(nullable = false)
-    private Boolean disponible = true;
+    public Activites_Voyages(Activites activite, Voyages voyage) {
+        this.activite = activite;
+        this.voyage = voyage;
+        this.id = new ActiviteVoyageId(activite.getId(), voyage.getId());
+    }
 }

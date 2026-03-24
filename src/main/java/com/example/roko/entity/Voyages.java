@@ -64,13 +64,8 @@ public class Voyages {
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL)
     private Set<Reservations> reservations = new HashSet<>();
 
-    public void addActivite(Activites activite, Boolean obligatoire, Integer ordre) {
-        Activites_Voyages activiteVoyage = new Activites_Voyages();
-        activiteVoyage.setActivite(activite);
-        activiteVoyage.setVoyage(this);
-        activiteVoyage.setObligatoire(obligatoire);
-        activiteVoyage.setOrdreAffichage(ordre);
-        activiteVoyage.setDisponible(true);
+    public void addActivite(Activites activite) {
+        Activites_Voyages activiteVoyage = new Activites_Voyages(activite, this);
 
         activitesVoyages.add(activiteVoyage);
         activite.getActivitesVoyages().add(activiteVoyage);

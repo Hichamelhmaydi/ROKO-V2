@@ -2,6 +2,7 @@ package com.example.roko.service;
 
 import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
+import com.example.roko.entity.ActiviteVoyageId;
 import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.entity.Voyages;
 import com.example.roko.exception.ResourceNotFoundException;
@@ -53,9 +54,7 @@ public class ActiviteService {
             Activites_Voyages activiteVoyage = new Activites_Voyages();
             activiteVoyage.setActivite(savedActivite);
             activiteVoyage.setVoyage(voyage);
-            activiteVoyage.setObligatoire(false);
-            activiteVoyage.setDisponible(true);
-            activiteVoyage.setPrix(savedActivite.getPrix());
+            activiteVoyage.setId(new ActiviteVoyageId(savedActivite.getId(), voyage.getId()));
             activiteVoyageRepository.save(activiteVoyage);
             log.info("Association activite_voyage créée automatiquement pour l'activité {}", savedActivite.getId());
         }

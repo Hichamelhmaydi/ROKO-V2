@@ -1,6 +1,7 @@
 package com.example.roko.repository;
 
 import com.example.roko.entity.Activites_Voyages;
+import com.example.roko.entity.ActiviteVoyageId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ActiviteVoyageRepository extends JpaRepository<Activites_Voyages, Long> {
+public interface ActiviteVoyageRepository extends JpaRepository<Activites_Voyages, ActiviteVoyageId> {
 
-    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId ORDER BY av.ordreAffichage")
+    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId ORDER BY av.activite.id")
     List<Activites_Voyages> findByVoyageId(@Param("voyageId") Long voyageId);
 
     @Query("SELECT av FROM Activites_Voyages av WHERE av.activite.id = :activiteId")
@@ -26,22 +27,22 @@ public interface ActiviteVoyageRepository extends JpaRepository<Activites_Voyage
 
     boolean existsByActiviteIdAndVoyageId(Long activiteId, Long voyageId);
 
-    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId AND av.obligatoire = true ORDER BY av.ordreAffichage")
+    @Query("SELECT av FROM Activites_Voyages av WHERE 1 = 0")
     List<Activites_Voyages> findObligatoiresByVoyageId(@Param("voyageId") Long voyageId);
 
-    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId AND av.obligatoire = false ORDER BY av.ordreAffichage")
+    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId ORDER BY av.activite.id")
     List<Activites_Voyages> findOptionellesByVoyageId(@Param("voyageId") Long voyageId);
 
-    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId AND av.disponible = true ORDER BY av.ordreAffichage")
+    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId ORDER BY av.activite.id")
     List<Activites_Voyages> findDisponiblesByVoyageId(@Param("voyageId") Long voyageId);
 
     @Query("SELECT COUNT(av) FROM Activites_Voyages av WHERE av.voyage.id = :voyageId")
     long countByVoyageId(@Param("voyageId") Long voyageId);
 
-    @Query("SELECT COUNT(av) FROM Activites_Voyages av WHERE av.voyage.id = :voyageId AND av.obligatoire = true")
+    @Query("SELECT 0")
     long countObligatoiresByVoyageId(@Param("voyageId") Long voyageId);
 
-    @Query("SELECT av FROM Activites_Voyages av WHERE av.voyage.id = :voyageId AND av.jourPrevu = :jour ORDER BY av.ordreAffichage")
+    @Query("SELECT av FROM Activites_Voyages av WHERE 1 = 0")
     List<Activites_Voyages> findByVoyageIdAndJour(
             @Param("voyageId") Long voyageId,
             @Param("jour") String jour);

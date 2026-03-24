@@ -3,6 +3,7 @@ package com.example.roko.controller;
 import com.example.roko.dto.response.VoyageDTO;
 import com.example.roko.enums.VoyageStatus;
 import com.example.roko.service.VoyageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class VoyageController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VoyageDTO> createVoyage(@RequestBody VoyageDTO voyageDTO) {
+    public ResponseEntity<VoyageDTO> createVoyage(@Valid @RequestBody VoyageDTO voyageDTO) {
         try {
             VoyageDTO createdVoyage = voyageService.createVoyage(voyageDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdVoyage);
@@ -110,7 +111,7 @@ public class VoyageController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VoyageDTO> updateVoyage(
             @PathVariable Long id,
-            @RequestBody VoyageDTO voyageDTO) {
+            @Valid @RequestBody VoyageDTO voyageDTO) {
         try {
             VoyageDTO updatedVoyage = voyageService.updateVoyage(id, voyageDTO);
             return ResponseEntity.ok(updatedVoyage);
@@ -164,12 +165,8 @@ public class VoyageController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVoyage(@PathVariable Long id) {
-        try {
-            voyageService.deleteVoyage(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        voyageService.deleteVoyage(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/stats/disponibles")

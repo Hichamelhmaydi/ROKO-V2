@@ -342,9 +342,7 @@ public class ReservationService {
     }
 
     private Set<Long> getMandatoryActivityIds(Long voyageId) {
-        return activiteVoyageRepository.findObligatoiresByVoyageId(voyageId).stream()
-                .map(av -> av.getActivite().getId())
-                .collect(java.util.stream.Collectors.toSet());
+        return java.util.Collections.emptySet();
     }
 
     private Set<Activites> resolveAndValidateActivities(Set<Long> activitesIds, Voyages voyage) {
@@ -386,17 +384,6 @@ public class ReservationService {
     }
 
     private BigDecimal resolveActivityPrice(Activites activite, Voyages voyage) {
-        BigDecimal prixAssociation = activite.getActivitesVoyages().stream()
-                .filter(av -> av.getVoyage().getId().equals(voyage.getId()))
-                .map(Activites_Voyages::getPrix)
-                .filter(prix -> prix != null && prix.compareTo(BigDecimal.ZERO) >= 0)
-                .findFirst()
-                .orElse(null);
-
-        if (prixAssociation != null) {
-            return prixAssociation;
-        }
-
         if (activite.getPrix() != null && activite.getPrix().compareTo(BigDecimal.ZERO) >= 0) {
             return activite.getPrix();
         }

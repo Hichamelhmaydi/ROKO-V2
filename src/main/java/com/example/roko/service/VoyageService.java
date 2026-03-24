@@ -1,6 +1,8 @@
 package com.example.roko.service;
 
 import com.example.roko.dto.response.VoyageDTO;
+import com.example.roko.exception.BusinessException;
+import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.mapper.VoyageMapper;
 import com.example.roko.entity.Voyages;
 import com.example.roko.enums.VoyageStatus;
@@ -10,6 +12,7 @@ import com.example.roko.repository.PaymentRepository;
 import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,20 +110,10 @@ public class VoyageService {
         existingVoyage.setDateRetour(voyageDTO.getDateRetour());
         existingVoyage.setItineraire(voyageDTO.getItineraire());
         if (voyageDTO.getPrixBase() != null) {
-            // Admin is resetting the initial price; recalculate total with mandatory activities
+            // With a pure pivot table, prixBase and prixInitial are aligned.
             BigDecimal newPrixInitial = voyageDTO.getPrixBase();
             existingVoyage.setPrixInitial(newPrixInitial);
-            BigDecimal sumObligatoires = activiteVoyageRepository
-                    .findObligatoiresByVoyageId(existingVoyage.getId())
-                    .stream()
-                    .map(av -> {
-                        if (av.getPrix() != null && av.getPrix().compareTo(BigDecimal.ZERO) > 0) {
-                            return av.getPrix();
-                        }
-                        return av.getActivite().getPrix() != null ? av.getActivite().getPrix() : BigDecimal.ZERO;
-                    })
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            existingVoyage.setPrixBase(newPrixInitial.add(sumObligatoires));
+            existingVoyage.setPrixBase(newPrixInitial);
         }
 
         if (voyageDTO.getPhotos() != null) {
@@ -163,21 +156,24 @@ public class VoyageService {
     }
 
     public void deleteVoyage(Long id) {
-        if (!voyageRepository.existsById(id)) {
-            throw new RuntimeException("Voyage non trouvé avec l'ID: " + id);
+        Voyages voyage = voyageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Voyage non trouvé avec l'ID: " + id));
+
+        try {
+            List<Long> reservationIds = reservationRepository.findIdsByVoyageId(id);
+            if (!reservationIds.isEmpty()) {
+                reservationRepository.deleteReservationActivitiesByReservationIds(reservationIds);
+                paymentRepository.deleteByReservationIds(reservationIds);
+            }
+
+            reservationRepository.deleteByVoyageId(id);
+            activiteVoyageRepository.deleteByVoyageId(id);
+            activiteRepository.deleteByVoyageId(id);
+
+            voyageRepository.delete(voyage);
+        } catch (DataIntegrityViolationException ex) {
+            throw new BusinessException("Suppression impossible: ce voyage est encore lie a d'autres donnees.", ex);
         }
-
-        List<Long> reservationIds = reservationRepository.findIdsByVoyageId(id);
-        if (!reservationIds.isEmpty()) {
-            reservationRepository.deleteReservationActivitiesByReservationIds(reservationIds);
-            paymentRepository.deleteByReservationIds(reservationIds);
-        }
-
-        reservationRepository.deleteByVoyageId(id);
-        activiteVoyageRepository.deleteByVoyageId(id);
-        activiteRepository.detachVoyageByVoyageId(id);
-
-        voyageRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
