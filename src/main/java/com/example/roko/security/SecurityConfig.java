@@ -47,8 +47,8 @@ public class SecurityConfig {
 
     @Bean
     public org.springframework.security.authentication.AuthenticationProvider authenticationProvider() {
-        org.springframework.security.authentication.dao.DaoAuthenticationProvider provider =
-            new org.springframework.security.authentication.dao.DaoAuthenticationProvider();
+        org.springframework.security.authentication.dao.DaoAuthenticationProvider provider
+                = new org.springframework.security.authentication.dao.DaoAuthenticationProvider();
         provider.setUserDetailsService(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Public auth endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/api/paiements/webhook").permitAll()
@@ -100,7 +101,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
