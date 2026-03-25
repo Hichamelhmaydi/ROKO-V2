@@ -1,0 +1,143 @@
+2026-03-24T15:53:08.371Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Starting RokoApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 1 (/app/app.war started by root in /app)
+2026-03-24T15:53:08.377Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : The following 1 profile is active: "docker"
+2026-03-24T15:53:15.825Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-24T15:53:16.210Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 308 ms. Found 8 JPA repository interfaces.
+2026-03-24T15:53:20.118Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-24T15:53:20.204Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-24T15:53:20.205Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2026-03-24T15:53:20.692Z  INFO 1 --- [roko] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-24T15:53:20.694Z  INFO 1 --- [roko] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 12207 ms
+2026-03-24T15:53:22.512Z  INFO 1 --- [roko] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-24T15:53:22.918Z  INFO 1 --- [roko] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-03-24T15:53:25.318Z  INFO 1 --- [roko] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-24T15:53:27.111Z  INFO 1 --- [roko] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-24T15:53:27.300Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-24T15:53:28.567Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@44da745f
+2026-03-24T15:53:28.571Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-24T15:53:28.701Z  WARN 1 --- [roko] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-24T15:53:39.240Z  INFO 1 --- [roko] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-24T15:53:39.809Z  WARN 1 --- [roko] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-03-24T15:53:39.818Z  WARN 1 --- [roko] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukk0ew22hb3du79tp0hdgu7qybp" of relation "payments" does not exist, skipping
+2026-03-24T15:53:39.843Z  WARN 1 --- [roko] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-03-24T15:53:39.846Z  WARN 1 --- [roko] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uke7qdxh4fch1yfisduker8j6w2" of relation "payments" does not exist, skipping
+2026-03-24T15:53:39.871Z  WARN 1 --- [roko] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-03-24T15:53:39.873Z  WARN 1 --- [roko] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk6dotkott2kjsp8vw4d0m25fb7" of relation "users" does not exist, skipping
+2026-03-24T15:53:40.025Z  INFO 1 --- [roko] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-24T15:53:42.605Z  INFO 1 --- [roko] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-24T15:53:54.448Z  INFO 1 --- [roko] [main] com.example.roko.service.StripeService   : Stripe API initialisée avec succès
+2026-03-24T15:53:54.454Z  WARN 1 --- [roko] [main] com.example.roko.service.StripeService   : Webhook secret Stripe non configuré: la validation des signatures webhook sera désactivée
+2026-03-24T15:53:55.143Z  INFO 1 --- [roko] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-24T15:53:55.146Z  WARN 1 --- [roko] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-03-24T15:53:56.075Z  WARN 1 --- [roko] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-24T15:53:58.947Z  INFO 1 --- [roko] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-03-24T15:54:08.095Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-24T15:54:08.538Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Started RokoApplication in 62.07 seconds (process running for 59.409)
+2026-03-24T15:54:11.386Z  INFO 1 --- [roko] [main] c.e.r.c.ActiviteVoyageSchemaMigration    : Migration activites_voyages appliquée: table pivot simplifiée
+2026-03-24T15:54:20.077Z  INFO 1 --- [roko] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-24T15:54:20.080Z  INFO 1 --- [roko] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-24T15:54:20.086Z  INFO 1 --- [roko] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+2026-03-24T16:06:31.492Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Starting RokoApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 1 (/app/app.war started by root in /app)
+2026-03-24T16:06:31.500Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : The following 1 profile is active: "docker"
+2026-03-24T16:06:40.002Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-24T16:06:40.520Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 482 ms. Found 8 JPA repository interfaces.
+2026-03-24T16:06:49.732Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-24T16:06:49.824Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-24T16:06:49.825Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2026-03-24T16:06:53.243Z  INFO 1 --- [roko] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-24T16:06:53.286Z  INFO 1 --- [roko] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 21560 ms
+2026-03-24T16:06:57.425Z  INFO 1 --- [roko] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-24T16:06:57.965Z  INFO 1 --- [roko] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-03-24T16:07:02.426Z  INFO 1 --- [roko] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-24T16:07:05.663Z  INFO 1 --- [roko] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-24T16:07:05.773Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-24T16:07:06.657Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@41abee65
+2026-03-24T16:07:06.662Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-24T16:07:06.764Z  WARN 1 --- [roko] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-24T16:07:16.376Z  INFO 1 --- [roko] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-24T16:07:16.869Z  INFO 1 --- [roko] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-24T16:07:18.663Z  INFO 1 --- [roko] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-24T16:07:44.487Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Starting RokoApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 1 (/app/app.war started by root in /app)
+2026-03-24T16:07:44.498Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : The following 1 profile is active: "docker"
+2026-03-24T16:07:50.556Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-24T16:07:50.774Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 206 ms. Found 8 JPA repository interfaces.
+2026-03-24T16:07:59.421Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-24T16:07:59.511Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-24T16:07:59.512Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2026-03-24T16:08:00.042Z  INFO 1 --- [roko] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-24T16:08:00.087Z  INFO 1 --- [roko] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 15237 ms
+2026-03-24T16:08:02.008Z  INFO 1 --- [roko] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-24T16:08:02.508Z  INFO 1 --- [roko] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-03-24T16:08:04.931Z  INFO 1 --- [roko] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-24T16:08:06.112Z  INFO 1 --- [roko] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-24T16:08:06.154Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-24T16:08:06.834Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@44da745f
+2026-03-24T16:08:06.837Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-24T16:08:07.089Z  WARN 1 --- [roko] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-24T16:08:15.919Z  INFO 1 --- [roko] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-24T16:08:16.422Z  INFO 1 --- [roko] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-24T16:08:17.890Z  INFO 1 --- [roko] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-24T16:08:24.401Z  INFO 1 --- [roko] [main] com.example.roko.service.StripeService   : Stripe API initialisée avec succès
+2026-03-24T16:08:24.402Z  WARN 1 --- [roko] [main] com.example.roko.service.StripeService   : Webhook secret Stripe non configuré: la validation des signatures webhook sera désactivée
+2026-03-24T16:08:25.299Z  INFO 1 --- [roko] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-24T16:08:25.311Z  WARN 1 --- [roko] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-03-24T16:08:26.626Z  WARN 1 --- [roko] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-24T16:08:32.212Z  INFO 1 --- [roko] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-03-24T16:08:47.515Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-24T16:08:47.648Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Started RokoApplication in 66.176 seconds (process running for 64.124)
+2026-03-24T16:08:52.059Z  INFO 1 --- [roko] [main] c.e.r.c.ActiviteVoyageSchemaMigration    : Migration activites_voyages appliquée: table pivot simplifiée
+2026-03-24T16:08:52.249Z  INFO 1 --- [roko] [http-nio-8080-exec-3] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-24T16:08:52.251Z  INFO 1 --- [roko] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-24T16:08:52.338Z  INFO 1 --- [roko] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 22 ms
+2026-03-24T16:09:41.441Z  INFO 1 --- [roko] [http-nio-8080-exec-9] com.example.roko.service.AuthService     : === DEBUT LOGIN ===
+2026-03-24T16:09:41.443Z  INFO 1 --- [roko] [http-nio-8080-exec-9] com.example.roko.service.AuthService     : Email reçu: admin@admin
+2026-03-24T16:09:41.444Z  INFO 1 --- [roko] [http-nio-8080-exec-9] com.example.roko.service.AuthService     : Mot de passe reçu (longueur): 5
+2026-03-24T16:09:41.468Z ERROR 1 --- [roko] [http-nio-8080-exec-9] com.example.roko.service.AuthService     : Utilisateur non trouvé avec l'email: admin@admin
+2026-03-24T16:09:51.349Z  INFO 1 --- [roko] [http-nio-8080-exec-10] com.example.roko.service.AuthService     : === DEBUT LOGIN ===
+2026-03-24T16:09:51.351Z  INFO 1 --- [roko] [http-nio-8080-exec-10] com.example.roko.service.AuthService     : Email reçu: admin@roko.com
+2026-03-24T16:09:51.351Z  INFO 1 --- [roko] [http-nio-8080-exec-10] com.example.roko.service.AuthService     : Mot de passe reçu (longueur): 5
+2026-03-24T16:09:51.360Z ERROR 1 --- [roko] [http-nio-8080-exec-10] com.example.roko.service.AuthService     : Utilisateur non trouvé avec l'email: admin@roko.com
+2026-03-24T16:09:56.007Z  INFO 1 --- [roko] [http-nio-8080-exec-2] com.example.roko.service.AuthService     : === DEBUT LOGIN ===
+2026-03-24T16:09:56.028Z  INFO 1 --- [roko] [http-nio-8080-exec-2] com.example.roko.service.AuthService     : Email reçu: admin@roko.com
+2026-03-24T16:09:56.045Z  INFO 1 --- [roko] [http-nio-8080-exec-2] com.example.roko.service.AuthService     : Mot de passe reçu (longueur): 5
+2026-03-24T16:09:56.050Z ERROR 1 --- [roko] [http-nio-8080-exec-2] com.example.roko.service.AuthService     : Utilisateur non trouvé avec l'email: admin@roko.com
+2026-03-24T16:09:56.804Z  INFO 1 --- [roko] [http-nio-8080-exec-1] com.example.roko.service.AuthService     : === DEBUT LOGIN ===
+2026-03-24T16:09:56.805Z  INFO 1 --- [roko] [http-nio-8080-exec-1] com.example.roko.service.AuthService     : Email reçu: admin@roko.com
+2026-03-24T16:09:56.806Z  INFO 1 --- [roko] [http-nio-8080-exec-1] com.example.roko.service.AuthService     : Mot de passe reçu (longueur): 5
+2026-03-24T16:09:56.810Z ERROR 1 --- [roko] [http-nio-8080-exec-1] com.example.roko.service.AuthService     : Utilisateur non trouvé avec l'email: admin@roko.com
+2026-03-24T16:10:06.388Z  INFO 1 --- [roko] [http-nio-8080-exec-6] com.example.roko.service.AuthService     : === DEBUT LOGIN ===
+2026-03-24T16:10:06.391Z  INFO 1 --- [roko] [http-nio-8080-exec-6] com.example.roko.service.AuthService     : Email reçu: admin@roko.com
+2026-03-24T16:10:06.394Z  INFO 1 --- [roko] [http-nio-8080-exec-6] com.example.roko.service.AuthService     : Mot de passe reçu (longueur): 5
+2026-03-24T16:10:06.408Z ERROR 1 --- [roko] [http-nio-8080-exec-6] com.example.roko.service.AuthService     : Utilisateur non trouvé avec l'email: admin@roko.com
+2026-03-24T16:22:45.773Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Starting RokoApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 1 (/app/app.war started by root in /app)
+2026-03-24T16:22:45.780Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : The following 1 profile is active: "docker"
+2026-03-24T16:22:51.514Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-24T16:22:52.016Z  INFO 1 --- [roko] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 437 ms. Found 8 JPA repository interfaces.
+2026-03-24T16:23:00.210Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-24T16:23:00.336Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-24T16:23:00.388Z  INFO 1 --- [roko] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2026-03-24T16:23:00.928Z  INFO 1 --- [roko] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-03-24T16:23:00.929Z  INFO 1 --- [roko] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 14953 ms
+2026-03-24T16:23:02.911Z  INFO 1 --- [roko] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-24T16:23:03.397Z  INFO 1 --- [roko] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-03-24T16:23:07.295Z  INFO 1 --- [roko] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-24T16:23:08.521Z  INFO 1 --- [roko] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-24T16:23:08.640Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-24T16:23:10.106Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@a97a895
+2026-03-24T16:23:10.108Z  INFO 1 --- [roko] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-03-24T16:23:10.234Z  WARN 1 --- [roko] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-24T16:23:16.151Z  INFO 1 --- [roko] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-24T16:23:16.460Z  INFO 1 --- [roko] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-24T16:23:18.602Z  INFO 1 --- [roko] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-24T16:23:23.616Z  INFO 1 --- [roko] [main] com.example.roko.service.StripeService   : Stripe API initialisée avec succès
+2026-03-24T16:23:23.617Z  WARN 1 --- [roko] [main] com.example.roko.service.StripeService   : Webhook secret Stripe non configuré: la validation des signatures webhook sera désactivée
+2026-03-24T16:23:24.016Z  INFO 1 --- [roko] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-03-24T16:23:24.018Z  WARN 1 --- [roko] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-03-24T16:23:24.587Z  WARN 1 --- [roko] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-24T16:23:26.531Z  INFO 1 --- [roko] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-03-24T16:23:31.757Z  INFO 1 --- [roko] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-03-24T16:23:31.838Z  INFO 1 --- [roko] [main] com.example.roko.RokoApplication         : Started RokoApplication in 50.142 seconds (process running for 61.716)
+2026-03-24T16:23:32.953Z  INFO 1 --- [roko] [main] c.e.roko.config.DockerAdminInitializer   : Default docker admin created: admin@roko.com
+2026-03-24T16:23:33.057Z  INFO 1 --- [roko] [main] c.e.r.c.ActiviteVoyageSchemaMigration    : Migration activites_voyages appliquée: table pivot simplifiée
+2026-03-24T16:23:36.266Z  INFO 1 --- [roko] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-24T16:23:36.267Z  INFO 1 --- [roko] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-24T16:23:36.269Z  INFO 1 --- [roko] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
