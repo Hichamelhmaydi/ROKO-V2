@@ -57,12 +57,3 @@ logging:
     name: logs/roko.log
     max-size: 10MB
     max-history: 30
-
-app:
-  default-admin:
-    enabled: ${DEFAULT_ADMIN_ENABLED:true}
-    email: ${DEFAULT_ADMIN_EMAIL:admin@roko.com}
-    password: ${DEFAULT_ADMIN_PASSWORD:admin}
-    nom: ${DEFAULT_ADMIN_NOM:Admin}
-    prenom: ${DEFAULT_ADMIN_PRENOM:Roko}
-    telephone: ${DEFAULT_ADMIN_TELEPHONE:0600000000}

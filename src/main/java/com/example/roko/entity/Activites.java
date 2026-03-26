@@ -39,3 +39,4 @@ public class Activites {
     @ManyToMany(mappedBy = "activites")
     private Set<Reservations> reservations = new HashSet<>();
 }
+    
