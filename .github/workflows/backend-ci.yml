@@ -106,7 +106,7 @@ jobs:
 
       - name: Skip deploy when secrets are missing
         if: steps.deploy_check.outputs.ready != 'true'
-        run: echo "Deploy skipped: required secrets are missing."
+        run: 'echo "Deploy skipped: required secrets are missing."'
 
       - name: Deploy backend container over SSH
         if: steps.deploy_check.outputs.ready == 'true'
