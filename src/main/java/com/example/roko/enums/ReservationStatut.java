@@ -6,7 +6,5 @@ public enum ReservationStatut {
     ANNULEE,
     ECHEC,
     EN_ATTENTE,
-    EN_ATTENTE_PAIEMENT,
-    CONFIRMEE,
-    COMPLETEE
+    EN_ATTENTE_PAIEMENT
 }

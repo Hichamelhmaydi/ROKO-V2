@@ -42,9 +42,9 @@ stripe:
   webhook:
     secret: ${STRIPE_WEBHOOK_SECRET:}
   success:
-    url: http://localhost/payment/success
+    url: http://localhost:4200/payment/success
   cancel:
-    url: http://localhost/payment/cancel
+    url: http://localhost:4200/payment/cancel
 
 file:
   upload-dir: ${FILE_UPLOAD_DIR:uploads}

@@ -11,8 +11,8 @@ public class AdminDashboardDTO {
 
     private long totalReservations;
     private long reservationsEnAttente;
-    private long reservationsConfirmees;
-    private long reservationsCompletees;
+    private long reservationsEnAttentePaiement;
+    private long reservationsPayees;
     private long reservationsAnnulees;
 
     private long totalVoyages;

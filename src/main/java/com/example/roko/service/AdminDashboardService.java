@@ -24,8 +24,8 @@ public class AdminDashboardService {
         return new AdminDashboardDTO(
                 reservationRepository.count(),
                 reservationRepository.countByStatut(ReservationStatut.EN_ATTENTE),
-                reservationRepository.countByStatut(ReservationStatut.CONFIRMEE),
-                reservationRepository.countByStatut(ReservationStatut.COMPLETEE),
+                reservationRepository.countByStatut(ReservationStatut.EN_ATTENTE_PAIEMENT),
+                reservationRepository.countByStatut(ReservationStatut.PAYEE),
                 reservationRepository.countByStatut(ReservationStatut.ANNULEE),
                 voyageRepository.count(),
                 voyageRepository.countByStatut(VoyageStatus.DISPONIBLE),

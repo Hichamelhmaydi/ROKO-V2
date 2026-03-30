@@ -134,15 +134,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-    @PutMapping("/{id}/confirmer")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ReservationDTO> confirmerReservation(@PathVariable Long id) {
-        log.info("Requête PUT /api/reservations/{}/confirmer", id);
-
-        ReservationDTO reservation = reservationService.confirmerReservation(id);
-        return ResponseEntity.ok(reservation);
-    }
-
     @PutMapping("/{id}/annuler")
     @PreAuthorize("hasAnyRole('VOYAGEUR', 'ADMIN')")
     public ResponseEntity<ReservationDTO> annulerReservation(
@@ -157,15 +148,6 @@ public class ReservationController {
         boolean isAdmin = isAdmin(authentication);
 
         ReservationDTO reservation = reservationService.annulerReservation(id, motif, userId, isAdmin);
-        return ResponseEntity.ok(reservation);
-    }
-
-    @PutMapping("/{id}/completer")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ReservationDTO> completerReservation(@PathVariable Long id) {
-        log.info("Requête PUT /api/reservations/{}/completer", id);
-
-        ReservationDTO reservation = reservationService.completerReservation(id);
         return ResponseEntity.ok(reservation);
     }
 

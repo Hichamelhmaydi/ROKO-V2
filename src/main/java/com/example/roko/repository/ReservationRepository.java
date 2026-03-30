@@ -42,14 +42,8 @@ public interface ReservationRepository extends JpaRepository<Reservations, Long>
     @Query("SELECT r FROM Reservations r WHERE r.statut = 'EN_ATTENTE' ORDER BY r.dateReservation ASC")
     List<Reservations> findReservationsEnAttente();
 
-    @Query("SELECT r FROM Reservations r WHERE r.statut = 'CONFIRMEE' ORDER BY r.dateReservation DESC")
-    List<Reservations> findReservationsConfirmees();
-
     @Query("SELECT r FROM Reservations r WHERE r.statut = 'ANNULEE' ORDER BY r.dateAnnulation DESC")
     List<Reservations> findReservationsAnnulees();
-
-    @Query("SELECT r FROM Reservations r WHERE r.statut = 'COMPLETEE' ORDER BY r.dateCompletion DESC")
-    List<Reservations> findReservationsCompletees();
 
     @Query("SELECT r FROM Reservations r WHERE r.dateReservation BETWEEN :debut AND :fin ORDER BY r.dateReservation DESC")
     List<Reservations> findByDateReservationBetween(
@@ -73,7 +67,7 @@ public interface ReservationRepository extends JpaRepository<Reservations, Long>
             @Param("userId") Long userId,
             @Param("statut") ReservationStatut statut);
 
-    @Query("SELECT SUM(r.montantTotal) FROM Reservations r WHERE r.voyage.id = :voyageId AND r.statut = 'CONFIRMEE'")
+    @Query("SELECT SUM(r.montantTotal) FROM Reservations r WHERE r.voyage.id = :voyageId AND r.statut = 'PAYEE'")
     Double calculateTotalRevenueByVoyage(@Param("voyageId") Long voyageId);
 
     @Query("SELECT r FROM Reservations r WHERE r.dateReservation >= :dateDebut ORDER BY r.dateReservation DESC")

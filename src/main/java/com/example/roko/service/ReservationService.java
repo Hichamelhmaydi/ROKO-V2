@@ -172,28 +172,6 @@ public class ReservationService {
         return reservationMapper.toDTOList(reservations);
     }
 
-    public ReservationDTO confirmerReservation(Long id) {
-        log.info("Confirmation de la réservation ID: {}", id);
-
-        Reservations reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                "Réservation non trouvée avec l'ID: " + id));
-
-        if (reservation.getStatut() != ReservationStatut.EN_ATTENTE
-                && reservation.getStatut() != ReservationStatut.EN_ATTENTE_PAIEMENT) {
-            throw new BusinessException(
-                    "Seules les réservations en attente peuvent être confirmées");
-        }
-
-        reservation.setStatut(ReservationStatut.CONFIRMEE);
-        reservation.setDateConfirmation(LocalDateTime.now());
-
-        Reservations updatedReservation = reservationRepository.save(reservation);
-        log.info("Réservation confirmée avec succès. ID: {}", id);
-
-        return reservationMapper.toDTO(updatedReservation);
-    }
-
     public ReservationDTO annulerReservation(Long id, String motif, Long userId, boolean isAdmin) {
         log.info("Annulation de la réservation ID: {} par l'utilisateur {}", id, userId);
 
@@ -209,10 +187,6 @@ public class ReservationService {
             throw new BusinessException("Cette réservation est déjà annulée");
         }
 
-        if (reservation.getStatut() == ReservationStatut.COMPLETEE) {
-            throw new BusinessException("Impossible d'annuler une réservation complétée");
-        }
-
         reservation.setStatut(ReservationStatut.ANNULEE);
         reservation.setDateAnnulation(LocalDateTime.now());
         reservation.setMotifAnnulation(motif);
@@ -221,27 +195,6 @@ public class ReservationService {
         log.info("Réservation annulée avec succès. ID: {}", id);
 
         notificationService.envoyerNotificationReservationAnnulee(reservation.getVoyageur().getId(), id);
-
-        return reservationMapper.toDTO(updatedReservation);
-    }
-
-    public ReservationDTO completerReservation(Long id) {
-        log.info("Complétion de la réservation ID: {}", id);
-
-        Reservations reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                "Réservation non trouvée avec l'ID: " + id));
-
-        if (reservation.getStatut() != ReservationStatut.CONFIRMEE) {
-            throw new BusinessException(
-                    "Seules les réservations confirmées peuvent être complétées");
-        }
-
-        reservation.setStatut(ReservationStatut.COMPLETEE);
-        reservation.setDateCompletion(LocalDateTime.now());
-
-        Reservations updatedReservation = reservationRepository.save(reservation);
-        log.info("Réservation complétée avec succès. ID: {}", id);
 
         return reservationMapper.toDTO(updatedReservation);
     }
