@@ -33,9 +33,13 @@ public class StripeService {
     @Value("${stripe.cancel.url:http://localhost:4200/payment/cancel}")
     private String cancelUrl;
 
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
     @PostConstruct
     public void init() {
-        if (stripeApiKey == null || stripeApiKey.isBlank()) {
+        if (isNullOrBlank(stripeApiKey)) {
             log.warn("Clé Stripe absente: les endpoints de paiement Stripe seront indisponibles tant que stripe.api.key n'est pas configurée");
             return;
         }
@@ -43,7 +47,7 @@ public class StripeService {
         Stripe.apiKey = stripeApiKey;
         log.info("Stripe API initialisée avec succès");
 
-        if (webhookSecret == null || webhookSecret.isBlank()) {
+        if (isNullOrBlank(webhookSecret)) {
             log.warn("Webhook secret Stripe non configuré: la validation des signatures webhook sera désactivée");
         }
     }
@@ -52,7 +56,7 @@ public class StripeService {
      * Valide la signature du webhook Stripe et retourne l'événement
      */
     public Event constructWebhookEvent(String payload, String sigHeader) throws SignatureVerificationException {
-        if (webhookSecret == null || webhookSecret.isBlank()) {
+        if (isNullOrBlank(webhookSecret)) {
             log.warn("Webhook secret non configuré, parsing de l'événement sans validation de signature");
             return Event.GSON.fromJson(payload, Event.class);
         }
@@ -64,7 +68,7 @@ public class StripeService {
      * Vérifie si le webhook secret est configuré
      */
     public boolean isWebhookSecretConfigured() {
-        return webhookSecret != null && !webhookSecret.isBlank();
+        return !isNullOrBlank(webhookSecret);
     }
 
     public Session createCheckoutSession(

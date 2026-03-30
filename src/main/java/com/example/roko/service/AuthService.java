@@ -31,6 +31,10 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
     // LOGIN
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
         log.info("=== DEBUT LOGIN ===");
@@ -99,13 +103,13 @@ public class AuthService {
         }
 
         // Vérifier que le numéro CIN est fourni
-        if (registerRequest.getIdNational() == null || registerRequest.getIdNational().isBlank()) {
+        if (isNullOrBlank(registerRequest.getIdNational())) {
             throw new RuntimeException("Le numéro de pièce d'identité est obligatoire");
         }
 
         // Vérifier que la date d'expiration du CIN est dans le futur
         String dateExpiration = registerRequest.getDateExpiration();
-        if (dateExpiration == null || dateExpiration.isBlank()) {
+        if (isNullOrBlank(dateExpiration)) {
             throw new RuntimeException("La date d'expiration de la pièce d'identité est obligatoire");
         }
         try {

@@ -53,7 +53,7 @@ public class VoyageDTO {
     @JsonIgnore
     @AssertTrue(message = "La date de départ doit être aujourd'hui ou dans le futur")
     public boolean isDateDepartValid() {
-        if (dateDepart == null || dateDepart.isBlank()) {
+        if (dateDepart == null || dateDepart.trim().isEmpty()) {
             return true;
         }
         try {
@@ -66,7 +66,7 @@ public class VoyageDTO {
     @JsonIgnore
     @AssertTrue(message = "La date de retour doit être après la date de départ")
     public boolean isDateRangeValid() {
-        if (dateDepart == null || dateDepart.isBlank() || dateRetour == null || dateRetour.isBlank()) {
+        if (dateDepart == null || dateDepart.trim().isEmpty() || dateRetour == null || dateRetour.trim().isEmpty()) {
             return true;
         }
         try {

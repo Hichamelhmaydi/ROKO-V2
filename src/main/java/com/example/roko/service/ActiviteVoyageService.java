@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,7 @@ public class ActiviteVoyageService {
     @Transactional(readOnly = true)
     public List<ActiviteVoyageDTO> getActivitesObligatoires(Long voyageId) {
         log.info("Récupération des activités obligatoires du voyage {}", voyageId);
-        return List.of();
+        return new ArrayList<ActiviteVoyageDTO>();
     }
 
     @Transactional(readOnly = true)
@@ -104,7 +105,7 @@ public class ActiviteVoyageService {
     @Transactional(readOnly = true)
     public List<ActiviteVoyageDTO> getActivitesByJour(Long voyageId, String jour) {
         log.info("Récupération des activités du jour {} pour le voyage {}", jour, voyageId);
-        return List.of();
+        return new ArrayList<ActiviteVoyageDTO>();
     }
 
     public ActiviteVoyageDTO updateAssociation(Long id, ActiviteVoyageDTO dto) {
