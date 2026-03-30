@@ -59,23 +59,9 @@ public class Voyages {
     private List<String> photos = new ArrayList<>();
 
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Activites_Voyages> activitesVoyages = new HashSet<>();
+    private Set<Activites> activites = new HashSet<>();
 
     @OneToMany(mappedBy = "voyage", cascade = CascadeType.ALL)
     private Set<Reservations> reservations = new HashSet<>();
-
-    public void addActivite(Activites activite) {
-        Activites_Voyages activiteVoyage = new Activites_Voyages(activite, this);
-
-        activitesVoyages.add(activiteVoyage);
-        activite.getActivitesVoyages().add(activiteVoyage);
-    }
-
-    public void removeActivite(Activites activite) {
-        activitesVoyages.removeIf(av
-                -> av.getVoyage().equals(this) && av.getActivite().equals(activite));
-        activite.getActivitesVoyages().removeIf(av
-                -> av.getVoyage().equals(this) && av.getActivite().equals(activite));
-    }
 
 }

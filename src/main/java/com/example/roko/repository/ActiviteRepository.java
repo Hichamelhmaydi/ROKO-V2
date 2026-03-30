@@ -21,6 +21,8 @@ public interface ActiviteRepository extends JpaRepository<Activites, Long> {
     @Query("SELECT a FROM Activites a WHERE LOWER(a.nom) LIKE LOWER(CONCAT('%', :nom, '%'))")
     List<Activites> searchByNom(@Param("nom") String nom);
 
+    boolean existsByIdAndVoyageId(Long id, Long voyageId);
+
     boolean existsByNomAndVoyageId(String nom, Long voyageId);
 
     @Query("SELECT COUNT(a) FROM Activites a WHERE a.voyage.id = :voyageId")

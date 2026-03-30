@@ -6,7 +6,6 @@ import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.mapper.VoyageMapper;
 import com.example.roko.entity.Voyages;
 import com.example.roko.enums.VoyageStatus;
-import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.ActiviteRepository;
 import com.example.roko.repository.PaymentRepository;
 import com.example.roko.repository.ReservationRepository;
@@ -26,7 +25,6 @@ public class VoyageService {
 
     private final VoyageRepository voyageRepository;
     private final VoyageMapper voyageMapper;
-    private final ActiviteVoyageRepository activiteVoyageRepository;
     private final ActiviteRepository activiteRepository;
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
@@ -167,7 +165,6 @@ public class VoyageService {
             }
 
             reservationRepository.deleteByVoyageId(id);
-            activiteVoyageRepository.deleteByVoyageId(id);
             activiteRepository.deleteByVoyageId(id);
 
             voyageRepository.delete(voyage);

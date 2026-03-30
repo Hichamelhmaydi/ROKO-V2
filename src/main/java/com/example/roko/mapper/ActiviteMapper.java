@@ -2,7 +2,6 @@ package com.example.roko.mapper;
 
 import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
-import com.example.roko.entity.Activites_Voyages;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,16 +25,6 @@ public class ActiviteMapper {
         if (activite.getVoyage() != null) {
             dto.setVoyageId(activite.getVoyage().getId());
             dto.setVoyageNom(activite.getVoyage().getNom());
-        }
-
-        if (activite.getActivitesVoyages() != null && !activite.getActivitesVoyages().isEmpty()) {
-            Activites_Voyages av = activite.getActivitesVoyages().iterator().next();
-            if (dto.getVoyageId() == null) {
-                dto.setVoyageId(av.getVoyage().getId());
-            }
-            if (dto.getVoyageNom() == null) {
-                dto.setVoyageNom(av.getVoyage().getNom());
-            }
         }
 
         if (activite.getReservations() != null) {

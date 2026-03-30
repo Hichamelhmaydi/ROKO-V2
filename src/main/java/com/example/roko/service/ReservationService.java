@@ -7,7 +7,6 @@ import com.example.roko.exception.BusinessException;
 import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.mapper.ReservationMapper;
 import com.example.roko.repository.ActiviteRepository;
-import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.PaymentRepository;
 import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.UserRepository;
@@ -36,7 +35,6 @@ public class ReservationService {
     private final VoyageRepository voyageRepository;
     private final UserRepository userRepository;
     private final ActiviteRepository activiteRepository;
-    private final ActiviteVoyageRepository activiteVoyageRepository;
     private final PaymentRepository paymentRepository;
     private final ReservationMapper reservationMapper;
     private final NotificationService notificationService;
@@ -309,8 +307,8 @@ public class ReservationService {
                     .orElseThrow(() -> new ResourceNotFoundException(
                     "Activité non trouvée avec l'ID: " + activiteId));
 
-            boolean appartientAuVoyage = activiteVoyageRepository
-                    .existsByActiviteIdAndVoyageId(activiteId, voyage.getId());
+            boolean appartientAuVoyage = activiteRepository
+                    .existsByIdAndVoyageId(activiteId, voyage.getId());
 
             if (!appartientAuVoyage) {
                 throw new BusinessException(

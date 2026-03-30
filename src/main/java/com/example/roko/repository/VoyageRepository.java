@@ -13,34 +13,25 @@ import java.util.Optional;
 @Repository
 public interface VoyageRepository extends JpaRepository<Voyages, Long> {
 
-
     List<Voyages> findByDestination(String destination);
-
 
     List<Voyages> findByDestinationContainingIgnoreCase(String destination);
 
-
     List<Voyages> findByStatut(VoyageStatus statut);
-
 
     List<Voyages> findByStatutOrderByDateDepartAsc(VoyageStatus statut);
 
-
     List<Voyages> findByNomContainingIgnoreCase(String nom);
-
 
     List<Voyages> findByDestinationAndStatut(String destination, VoyageStatus statut);
 
-
-    @Query("SELECT v FROM Voyages v WHERE " +
-            "LOWER(v.nom) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(v.destination) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(v.itineraire) LIKE LOWER(CONCAT('%', :search, '%'))")
+    @Query("SELECT v FROM Voyages v WHERE "
+            + "LOWER(v.nom) LIKE LOWER(CONCAT('%', :search, '%')) OR "
+            + "LOWER(v.destination) LIKE LOWER(CONCAT('%', :search, '%')) OR "
+            + "LOWER(v.itineraire) LIKE LOWER(CONCAT('%', :search, '%'))")
     List<Voyages> searchVoyages(@Param("search") String search);
 
-
     long countByStatut(VoyageStatus statut);
-
 
     List<Voyages> findAllByStatutOrderByDateDepartAsc(VoyageStatus statut);
 
@@ -52,16 +43,13 @@ public interface VoyageRepository extends JpaRepository<Voyages, Long> {
 
     boolean existsByDestination(String destination);
 
-    @Query("SELECT v FROM Voyages v " +
-            "LEFT JOIN FETCH v.activitesVoyages av " +
-            "LEFT JOIN FETCH av.activite " +
-            "WHERE v.id = :id")
+    @Query("SELECT v FROM Voyages v "
+            + "LEFT JOIN FETCH v.activites a "
+            + "WHERE v.id = :id")
     Optional<Voyages> findByIdWithActivites(@Param("id") Long id);
 
-
-    @Query("SELECT DISTINCT v FROM Voyages v " +
-            "LEFT JOIN FETCH v.activitesVoyages av " +
-            "LEFT JOIN FETCH av.activite")
+    @Query("SELECT DISTINCT v FROM Voyages v "
+            + "LEFT JOIN FETCH v.activites a")
     List<Voyages> findAllWithActivites();
 
 }

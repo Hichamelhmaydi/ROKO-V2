@@ -76,12 +76,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
                 .requestMatchers("/api/auth/register-admin").hasRole("ADMIN")
                 // Public read-only exploration for guests
-                .requestMatchers(HttpMethod.GET, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/voyages/**", "/api/activites/**").permitAll()
                 // Admin-only write operations on voyages and activites
-                .requestMatchers(HttpMethod.POST, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/voyages/**", "/api/activites/**", "/api/activites-voyages/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/voyages/**", "/api/activites/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/voyages/**", "/api/activites/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/voyages/**", "/api/activites/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/voyages/**", "/api/activites/**").hasRole("ADMIN")
                 // Admin only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")

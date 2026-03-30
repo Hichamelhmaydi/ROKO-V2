@@ -7,7 +7,6 @@ import com.example.roko.exception.BusinessException;
 import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.mapper.VoyageMapper;
 import com.example.roko.repository.ActiviteRepository;
-import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.PaymentRepository;
 import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.VoyageRepository;
@@ -42,9 +41,6 @@ class VoyageServiceTest {
 
     @Mock
     private VoyageMapper voyageMapper;
-
-    @Mock
-    private ActiviteVoyageRepository activiteVoyageRepository;
 
     @Mock
     private ActiviteRepository activiteRepository;
@@ -167,7 +163,6 @@ class VoyageServiceTest {
         verify(reservationRepository, times(1)).deleteReservationActivitiesByReservationIds(reservationIds);
         verify(paymentRepository, times(1)).deleteByReservationIds(reservationIds);
         verify(reservationRepository, times(1)).deleteByVoyageId(id);
-        verify(activiteVoyageRepository, times(1)).deleteByVoyageId(id);
         verify(activiteRepository, times(1)).deleteByVoyageId(id);
         verify(voyageRepository, times(1)).delete(existing);
     }
@@ -186,7 +181,6 @@ class VoyageServiceTest {
         verify(reservationRepository, never()).deleteReservationActivitiesByReservationIds(any());
         verify(paymentRepository, never()).deleteByReservationIds(any());
         verify(reservationRepository, times(1)).deleteByVoyageId(id);
-        verify(activiteVoyageRepository, times(1)).deleteByVoyageId(id);
         verify(activiteRepository, times(1)).deleteByVoyageId(id);
         verify(voyageRepository, times(1)).delete(existing);
     }

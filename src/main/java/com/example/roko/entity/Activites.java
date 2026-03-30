@@ -29,9 +29,6 @@ public class Activites {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal prix = BigDecimal.ZERO;
 
-    @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Activites_Voyages> activitesVoyages = new HashSet<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voyage_id")
     private Voyages voyage;
@@ -39,4 +36,3 @@ public class Activites {
     @ManyToMany(mappedBy = "activites")
     private Set<Reservations> reservations = new HashSet<>();
 }
-    

@@ -2,14 +2,11 @@ package com.example.roko.service;
 
 import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
-import com.example.roko.entity.ActiviteVoyageId;
-import com.example.roko.entity.Activites_Voyages;
 import com.example.roko.entity.Voyages;
 import com.example.roko.exception.ResourceNotFoundException;
 import com.example.roko.exception.BusinessException;
 import com.example.roko.mapper.ActiviteMapper;
 import com.example.roko.repository.ActiviteRepository;
-import com.example.roko.repository.ActiviteVoyageRepository;
 import com.example.roko.repository.ReservationRepository;
 import com.example.roko.repository.VoyageRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +25,6 @@ public class ActiviteService {
     private final ActiviteRepository activiteRepository;
     private final VoyageRepository voyageRepository;
     private final ActiviteMapper activiteMapper;
-    private final ActiviteVoyageRepository activiteVoyageRepository;
     private final ReservationRepository reservationRepository;
 
     public ActiviteDTO createActivite(ActiviteDTO activiteDTO) {
@@ -48,16 +44,6 @@ public class ActiviteService {
 
         Activites savedActivite = activiteRepository.save(activite);
         log.info("Activité créée avec succès. ID: {}", savedActivite.getId());
-
-        // Créer automatiquement l'entrée dans activites_voyages (optionnelle par défaut)
-        if (!activiteVoyageRepository.existsByActiviteIdAndVoyageId(savedActivite.getId(), voyage.getId())) {
-            Activites_Voyages activiteVoyage = new Activites_Voyages();
-            activiteVoyage.setActivite(savedActivite);
-            activiteVoyage.setVoyage(voyage);
-            activiteVoyage.setId(new ActiviteVoyageId(savedActivite.getId(), voyage.getId()));
-            activiteVoyageRepository.save(activiteVoyage);
-            log.info("Association activite_voyage créée automatiquement pour l'activité {}", savedActivite.getId());
-        }
 
         return activiteMapper.toDTO(savedActivite);
     }
@@ -170,7 +156,6 @@ public class ActiviteService {
                 "Activité non trouvée avec l'ID: " + id));
 
         reservationRepository.deleteReservationActivitiesByActiviteId(id);
-        activiteVoyageRepository.deleteByActiviteId(id);
 
         activiteRepository.deleteById(id);
         log.info("Activité supprimée avec succès. ID: {}", id);
@@ -184,7 +169,6 @@ public class ActiviteService {
         }
 
         reservationRepository.deleteReservationActivitiesByActiviteId(id);
-        activiteVoyageRepository.deleteByActiviteId(id);
 
         activiteRepository.deleteById(id);
         log.info("Activité supprimée de force. ID: {}", id);
