@@ -29,6 +29,9 @@ public class Activites {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal prix = BigDecimal.ZERO;
 
+    @Column(nullable = false)
+    private Boolean obligatoire = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voyage_id")
     private Voyages voyage;

@@ -37,6 +37,9 @@ public interface ActiviteRepository extends JpaRepository<Activites, Long> {
     @Query("SELECT a FROM Activites a WHERE LOWER(a.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Activites> searchByDescription(@Param("keyword") String keyword);
 
+    @Query("SELECT a.id FROM Activites a WHERE a.voyage.id = :voyageId AND a.obligatoire = true")
+    List<Long> findMandatoryIdsByVoyageId(@Param("voyageId") Long voyageId);
+
     @Query("SELECT a FROM Activites a LEFT JOIN a.reservations r GROUP BY a.id ORDER BY COUNT(r) DESC")
     List<Activites> findMostPopularActivites();
 

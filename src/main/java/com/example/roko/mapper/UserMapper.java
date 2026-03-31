@@ -5,36 +5,30 @@ import com.example.roko.dto.response.UserDTO;
 import com.example.roko.entity.Admin;
 import com.example.roko.entity.User;
 import com.example.roko.entity.Voyageurs;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class UserMapper {
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-    public UserDTO toDTO(User user) {
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "role", expression = "java(resolveRole(user))")
+    UserDTO toDTO(User user);
+
+    default String resolveRole(User user) {
         if (user == null) {
             return null;
         }
-
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setNom(user.getNom());
-        dto.setPrenom(user.getPrenom());
-        dto.setEmail(user.getEmail());
-        dto.setTelephone(user.getTelephone());
-        dto.setStatus(user.getStatus() != null ? user.getStatus().name() : null);
-
         if (user instanceof Voyageurs) {
-            dto.setRole("VOYAGEUR");
-        } else if (user instanceof Admin) {
-            dto.setRole("ADMIN");
-        } else {
-            dto.setRole("USER");
+            return "VOYAGEUR";
         }
-
-        return dto;
+        if (user instanceof Admin) {
+            return "ADMIN";
+        }
+        return "USER";
     }
 
-    public User toEntity(CreateUserRequest dto) {
+    default User toEntity(CreateUserRequest dto) {
         throw new UnsupportedOperationException("Utilisez un mapper spécifique (VoyageurMapper ou AdminMapper) pour créer une entité.");
     }
 }

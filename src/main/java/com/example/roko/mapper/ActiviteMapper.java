@@ -2,79 +2,34 @@ package com.example.roko.mapper;
 
 import com.example.roko.dto.response.ActiviteDTO;
 import com.example.roko.entity.Activites;
-import org.springframework.stereotype.Component;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Component
-public class ActiviteMapper {
+@Mapper(componentModel = "spring")
+public interface ActiviteMapper {
 
-    public ActiviteDTO toDTO(Activites activite) {
-        if (activite == null) {
-            return null;
-        }
+    @Mapping(target = "voyageId", source = "voyage.id")
+    @Mapping(target = "voyageNom", source = "voyage.nom")
+    @Mapping(target = "nombreReservations", expression = "java(activite.getReservations() != null ? activite.getReservations().size() : null)")
+    ActiviteDTO toDTO(Activites activite);
 
-        ActiviteDTO dto = new ActiviteDTO();
-        dto.setId(activite.getId());
-        dto.setNom(activite.getNom());
-        dto.setDescription(activite.getDescription());
-        dto.setPrix(activite.getPrix());
+    @Mapping(target = "voyage", ignore = true)
+    @Mapping(target = "reservations", ignore = true)
+    Activites toEntity(ActiviteDTO dto);
 
-        if (activite.getVoyage() != null) {
-            dto.setVoyageId(activite.getVoyage().getId());
-            dto.setVoyageNom(activite.getVoyage().getNom());
-        }
+    List<ActiviteDTO> toDTOList(List<Activites> activites);
 
-        if (activite.getReservations() != null) {
-            dto.setNombreReservations(activite.getReservations().size());
-        }
+    List<Activites> toEntityList(List<ActiviteDTO> dtos);
 
-        return dto;
-    }
-
-    public Activites toEntity(ActiviteDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Activites activite = new Activites();
-        activite.setId(dto.getId());
-        activite.setNom(dto.getNom());
-        activite.setDescription(dto.getDescription());
-        activite.setPrix(dto.getPrix());
-
-        return activite;
-    }
-
-    public List<ActiviteDTO> toDTOList(List<Activites> activites) {
-        if (activites == null) {
-            return new ArrayList<>();
-        }
-        return activites.stream().map(this::toDTO).collect(Collectors.toList());
-    }
-
-    public List<Activites> toEntityList(List<ActiviteDTO> dtos) {
-        if (dtos == null) {
-            return new ArrayList<>();
-        }
-        return dtos.stream().map(this::toEntity).collect(Collectors.toList());
-    }
-
-    public void updateEntityFromDTO(ActiviteDTO dto, Activites activite) {
-        if (dto == null || activite == null) {
-            return;
-        }
-
-        if (dto.getNom() != null) {
-            activite.setNom(dto.getNom());
-        }
-        if (dto.getDescription() != null) {
-            activite.setDescription(dto.getDescription());
-        }
-        if (dto.getPrix() != null) {
-            activite.setPrix(dto.getPrix());
-        }
-    }
+    @BeanMapping(ignoreByDefault = true, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "nom", source = "nom")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "prix", source = "prix")
+    @Mapping(target = "obligatoire", source = "obligatoire")
+    void updateEntityFromDTO(ActiviteDTO dto, @MappingTarget Activites activite);
 }

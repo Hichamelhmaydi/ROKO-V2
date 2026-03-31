@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,6 +27,8 @@ public class ActiviteDTO {
 
     @NotNull(message = "Le prix de l'activité est obligatoire")
     private BigDecimal prix;
+
+    private Boolean obligatoire = false;
 
     @NotNull(message = "L'ID du voyage est obligatoire")
     private Long voyageId;

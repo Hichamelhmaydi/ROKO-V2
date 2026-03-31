@@ -293,7 +293,7 @@ public class ReservationService {
     }
 
     private Set<Long> getMandatoryActivityIds(Long voyageId) {
-        return java.util.Collections.emptySet();
+        return new HashSet<>(activiteRepository.findMandatoryIdsByVoyageId(voyageId));
     }
 
     private Set<Activites> resolveAndValidateActivities(Set<Long> activitesIds, Voyages voyage) {
