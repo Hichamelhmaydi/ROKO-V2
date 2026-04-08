@@ -2,7 +2,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://postgres:5432/roko_db}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:abc}
+    password: ${DB_PASSWORD:ABC12332100}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
@@ -33,12 +33,12 @@ server:
     context-path: /
 
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 stripe:
   api:
-    key: ${STRIPE_API_KEY:sk_test_placeholder}
+    key: ${STRIPE_API_KEY}
   webhook:
     secret: ${STRIPE_WEBHOOK_SECRET:}
   success:

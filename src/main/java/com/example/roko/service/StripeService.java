@@ -105,7 +105,7 @@ public class StripeService {
                                 .build()
                 )
                 .putMetadata("reservationId", reservationId.toString())
-                .setExpiresAt(System.currentTimeMillis() / 1000 + 3600)
+                .setExpiresAt(System.currentTimeMillis() / 1000 + 86400)
                 .build();
 
         Session session = Session.create(params);
